@@ -245,7 +245,7 @@ public class SinkFinder {
         }
         java.util.Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String logFile = "logs/vul_" + sdf.format(day) + UUID.randomUUID() + ".log";
+        String logFile = "logs/vul_" + sdf.format(day) + ".log";
         try {
             File file = new File(logFile);
             FileWriter fileWriter = new FileWriter(file, true);

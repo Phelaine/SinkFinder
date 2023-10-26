@@ -3,7 +3,6 @@ package com.mediocrity.entity;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 
 /**
  * @author: medi0cr1ty
@@ -16,11 +15,17 @@ public class SinkResult{
     public String sinkCata;
     public String sinkLevel;
     public ArrayList<String> invokeDetail;
+    private String format = "|%1$-5s|%2$-10s|%3$-6s|%4$-1s\n";
 
     public SinkResult(int count, String sinkName, String severityLevel, ArrayList<String> result) {
         this.invokeLength = count;
         this.sinkCata = sinkName;
         this.sinkLevel = severityLevel;
         this.invokeDetail = result;
+    }
+
+    public String toString(){
+        return String.format(format, invokeLength, sinkCata, sinkLevel,
+                String.join("\t", invokeDetail));
     }
 }
