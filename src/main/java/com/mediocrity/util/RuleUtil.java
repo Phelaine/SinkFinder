@@ -20,7 +20,7 @@ public class RuleUtil {
     public static boolean isExcluded(String excludeKey, ArrayList<String> rules) {
 
         // org/springframework/boot 转换为 org.springframework.boot
-        excludeKey = excludeKey.replaceAll("/", "\\.");
+//        excludeKey = excludeKey.replaceAll("/", "\\.");
 
         for (String exclusion : rules) {
             if (excludeKey.contains(exclusion)) {
@@ -43,7 +43,7 @@ public class RuleUtil {
 
 //        allInclude = false;
         // org/springframework/boot 转换为 org.springframework.boot
-        includeKey = includeKey.replaceAll("/", "\\.");
+//        includeKey = includeKey.replaceAll("/", "\\.");
 
         for (String inclusion : rules) {
 //            if (inclusion.equals("*")){

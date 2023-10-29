@@ -31,4 +31,22 @@ public class ClassRepo {
     public Set<ClassInfo> listAll() {
         return classes;
     }
+
+//    public String getClassInfo(String className){
+//        for (ClassInfo classInfo : classes){
+//            if (classInfo.getClassName().equals(className)){
+//                return classInfo.getClassName();
+//            }
+//        }
+//        return null;
+//    }
+
+    public ClassInfo getClassInfo(String className){
+        for (ClassInfo classInfo : classes){
+            if (classInfo.getClassName().equals(className)){
+                return classInfo;
+            }
+        }
+        return null;
+    }
 }

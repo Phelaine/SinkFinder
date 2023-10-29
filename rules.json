@@ -1,6 +1,6 @@
 {
   "path_exclusions": ["AndroidSDK",".idea","resources",".git","META-INF"],
-  "jar_name_inclusions": ["*","weblogic","coherence"],
+  "jar_name_inclusions": ["activemq-all-5.18.2","weblogic","coherence"],
   "jar_name_exclusions": ["sinkfinder-2","spring-boot","logback","lombok","META-INF","log4j","slf4j",
     "spring-context","tomcat-embed-core","spring-web","mysql-connector-java","antlr-"],
   "class_inclusions": ["org.apache.activemq.openwire"],
@@ -42,6 +42,10 @@
       "sink_name": "JDBC",
       "severity_level": "High",
       "sinks": ["com.mysql.cj.jdbc.result.ResultSetImpl:getObject"]
+    },{
+      "sink_name": "ZIPSLIP",
+      "severity_level": "High",
+      "sinks": ["java.util.zip.ZipInputStream:close"]
     }
   ]
 }

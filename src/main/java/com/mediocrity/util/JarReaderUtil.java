@@ -9,6 +9,7 @@ import org.objectweb.asm.tree.ClassNode;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -28,9 +29,9 @@ public class JarReaderUtil {
      *
      * @param jar         The jar file with the classes.
      * @param ruls
-     * @param isSingleJar
+//     * @param isSingleJar
      */
-    public static void readJar(File jar, Rules ruls, Boolean isSingleJar) {
+    public static void readJar(File jar, Rules ruls) {
         String[] names = jar.getName().split("\\\\");
         String name = names[names.length - 1];
 
@@ -40,7 +41,7 @@ public class JarReaderUtil {
 
         if ((jar.getName().endsWith(".class") || jar.getName().endsWith(".class/")) && !RuleUtil.isExcluded(jar.getName().replaceAll("/", "\\."), ruls.getClassExclusions())) {
             try (final InputStream fis = new FileInputStream(jar)) {
-                streamToNode(fis, jar.getName(), isSingleJar);
+                streamToNode(fis, jar.getName());
                 return;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -59,10 +60,10 @@ public class JarReaderUtil {
                         if (RuleUtil.isExcluded(itemName.replaceAll("/", "\\."), ruls.getClassExclusions())) {
                             continue;
                         }
-                        streamToNode(jis, jar.getName(), isSingleJar);
+                        streamToNode(jis, jar.getName());
                     }
                     if (itemName.endsWith(".jar") && (!RuleUtil.isExcluded(itemName, ruls.getJarNameExclusions()))) {
-                        readJar(jis, ruls, isSingleJar);
+                        readJar(jis, ruls);
                     }
                 }
             } catch (Exception e) {
@@ -75,11 +76,11 @@ public class JarReaderUtil {
                             final String itemName = entry.getName();
 
                             if (itemName.endsWith(".class") || itemName.endsWith(".class/")) {
-                                if (RuleUtil.isExcluded(itemName, ruls.getJarNameExclusions())) {
+                                if (RuleUtil.isExcluded(itemName.replaceAll("/", "\\."), ruls.getClassExclusions())) {
                                     continue;
                                 }
                                 try (final InputStream zis = zf.getInputStream(entry)) {
-                                    streamToNode(zis, jar.getName(), isSingleJar);
+                                    streamToNode(zis, jar.getName());
                                 }
                             }
                         }
@@ -91,7 +92,7 @@ public class JarReaderUtil {
         }
     }
 
-    private static void readJar(JarInputStream jis, Rules ruls, Boolean isSingleJar) throws IOException {
+    private static void readJar(JarInputStream jis, Rules ruls) throws IOException {
 
         JarEntry jarEntry;
         while ((jarEntry = jis.getNextJarEntry()) != null) {
@@ -100,7 +101,7 @@ public class JarReaderUtil {
 
             jarInputStreamToFile(jis, tempFile);
 
-            readJar(tempFile, ruls, isSingleJar);
+            readJar(tempFile, ruls);
 
         }
     }
@@ -118,13 +119,12 @@ public class JarReaderUtil {
 
     }
 
-
     /**
      * 根据输入流转换为 ClassNode
      *
      * @param is The inputstream convert to be classnode.
      */
-    private static void streamToNode(InputStream is, String jarName, Boolean isSingleJar) {
+    private static void streamToNode(InputStream is, String jarName) {
         try {
             final ByteArrayOutputStream streamBuilder = new ByteArrayOutputStream();
             int bytesRead;
@@ -137,14 +137,12 @@ public class JarReaderUtil {
             final ClassNode node = new ClassNode();
             new ClassReader(streamBuilder.toByteArray()).accept(node, ClassReader.SKIP_FRAMES);
 
-            if (isSingleJar) {
-                jarName = "";
-            }
+//            ArrayList<ClassInfo> superClasses = new ArrayList<>();
+//            final ClassInfo classInfo1 = new ClassInfo(node, jarName, (ArrayList<ClassInfo>) superClasses.clone());
             final ClassInfo classInfo = new ClassInfo(node, jarName);
             ClassRepo.getInstance().listAll().add(classInfo);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 }

@@ -49,8 +49,8 @@ public class SinkFinder {
 
         Rules ruls = (Rules) FileUtil.getJsonContent(SINK_RULE_FIlE, Rules.class);
 
-        Boolean isSingleJar = false;
-        readFile(target_file, ruls, isSingleJar);
+//        Boolean isSingleJar = false;
+        readFile(target_file, ruls);
 
         if (!CUSTOM_SINK_RULE.isEmpty()) {
             results = InsnAnalysis.runSink(ruls, CUSTOM_SINK_RULE, RECURSION_DEPTH);
@@ -73,25 +73,27 @@ public class SinkFinder {
 //        //数据库存储
 //        if (!DATABASE_ADDR.isEmpty())
 //            sinkFinder.databaseStore(results);
+
+        log.info("任务完成！");
     }
 
-    public static void readFile(File dir, Rules ruls, Boolean isSingleJar) {
+    public static void readFile(File dir, Rules ruls) {
 
         File[] files = dir.listFiles();
         if (files != null) {
             for (File file : files) {
                 if (file.isFile() && (file.getName().endsWith(".class") || file.getName().endsWith(".class/") || file.getName().endsWith(".jar") || file.getName().endsWith(".zip"))) {
-                    JarReaderUtil.readJar(file, ruls, isSingleJar);
+                    JarReaderUtil.readJar(file, ruls);
                 } else {
                     String path = file.getAbsolutePath();
                     if (!RuleUtil.isExcluded(path, ruls.getPathExclusions())) {
-                        readFile(file, ruls, false);
+                        readFile(file, ruls);
                     }
                 }
             }
         } else if (dir.isFile() && (dir.getName().endsWith(".class") || dir.getName().endsWith(".class/") || dir.getName().endsWith(".jar") || dir.getName().endsWith(".zip"))) {
-            isSingleJar = true;
-            JarReaderUtil.readJar(dir, ruls, isSingleJar);
+//            isSingleJar = true;
+            JarReaderUtil.readJar(dir, ruls);
         }
     }
 
@@ -236,7 +238,7 @@ public class SinkFinder {
     }
 
     public void sinkLog(String msg) {
-        System.out.println(msg);
+//        System.out.println(msg);
 
         try {
             File d = new File("logs");
@@ -245,7 +247,12 @@ public class SinkFinder {
         }
         java.util.Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String logFile = "logs/vul_" + sdf.format(day) + ".log";
+        String logFile = "";
+        if (CUSTOM_SINK_RULE == null){
+            logFile = "logs/vul_" + sdf.format(day) + ".log";
+        }else{
+            logFile = "logs/vul_" + sdf.format(day) + CUSTOM_SINK_RULE + "-1.log";
+        }
         try {
             File file = new File(logFile);
             FileWriter fileWriter = new FileWriter(file, true);
