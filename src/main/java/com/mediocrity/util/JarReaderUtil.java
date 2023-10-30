@@ -137,8 +137,6 @@ public class JarReaderUtil {
             final ClassNode node = new ClassNode();
             new ClassReader(streamBuilder.toByteArray()).accept(node, ClassReader.SKIP_FRAMES);
 
-//            ArrayList<ClassInfo> superClasses = new ArrayList<>();
-//            final ClassInfo classInfo1 = new ClassInfo(node, jarName, (ArrayList<ClassInfo>) superClasses.clone());
             final ClassInfo classInfo = new ClassInfo(node, jarName);
             ClassRepo.getInstance().listAll().add(classInfo);
         } catch (IOException e) {

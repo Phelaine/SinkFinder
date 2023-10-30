@@ -249,9 +249,10 @@ public class SinkFinder {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String logFile = "";
         if (CUSTOM_SINK_RULE == null){
-            logFile = "logs/vul_" + sdf.format(day) + ".log";
+            logFile = "logs/vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_") + ".log";
         }else{
-            logFile = "logs/vul_" + sdf.format(day) + CUSTOM_SINK_RULE + "-1.log";
+            logFile = "logs/vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
+                    ".log";
         }
         try {
             File file = new File(logFile);

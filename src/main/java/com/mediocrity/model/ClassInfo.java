@@ -4,6 +4,7 @@ import lombok.Data;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * @author: medi0cr1ty
@@ -13,10 +14,9 @@ import java.util.ArrayList;
 public class ClassInfo {
     private ClassNode classNode;
     private String jarName;
-//    private ExtendClassInfo extendClassInfo;
     private ArrayList<String> superClasses;
 
-//    public ClassInfo(ClassNode node, String jarName, ArrayList<ClassInfo> superClasses) {
+//    public ClassInfo(ClassNode node, String jarName, ClassInfo superClasses) {
 //        classNode = node;
 //        this.jarName = jarName;
 //        this.superClasses = superClasses;
