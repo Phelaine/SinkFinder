@@ -20,13 +20,4 @@ public class ClassInfo {
         this.classNode = classNode;
         this.jarName = jarName;
     }
-
-//    public String getClassInfo(){
-//        return jarName + "#" + classNode.name.replaceAll("/", "\\.");
-//    }
-//
-//    public String getClassName(){
-//        return classNode.name.replaceAll("/", "\\.");
-//    }
-
 }

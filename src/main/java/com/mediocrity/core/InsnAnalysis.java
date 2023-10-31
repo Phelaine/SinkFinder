@@ -162,23 +162,6 @@ public class InsnAnalysis {
         }
     }
 
-//    private static void findSuperClasses(String className) {
-//        if (nullOrNoSuperClasses.contains(className))
-//            return;
-//        ClassInfo i = ClassRepo.getInstance().getClassInfo(className);
-//        if (i != null) {
-//            String s = i.getClassNode().superName.replaceAll("/", "\\.");
-//            if (!s.equals("java.lang.Object")) {
-//                insnMethodOwners.add(s);
-//                findSuperClasses(s);
-//            } else {
-//                nullOrNoSuperClasses.add(className);
-//            }
-//        } else {
-//            nullOrNoSuperClasses.add(className);
-//        }
-//    }
-
     public static void findSubClasses(String superName){
         for (Map.Entry<String, ClassInfo> classInfoEntry: ClassRepo.classes.entrySet()){
             if (classInfoEntry.getValue().getClassNode().superName.replaceAll("/", "\\.").contains(superName)){
