@@ -9,7 +9,6 @@ import org.objectweb.asm.tree.ClassNode;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;

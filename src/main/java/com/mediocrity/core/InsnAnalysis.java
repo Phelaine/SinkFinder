@@ -9,8 +9,10 @@ import com.mediocrity.entity.WrapperNode;
 import com.mediocrity.util.ASMUtil;
 import com.mediocrity.util.RuleUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * @author: medi0cr1ty
@@ -19,19 +21,17 @@ import java.util.ArrayList;
 @Slf4j
 public class InsnAnalysis {
 
-    private static ArrayList<String> nullOrNoSuperClasses = new ArrayList<>();
-
-    private static String clsName;
+    private static HashSet<String> nullOrNoSuperClasses = new HashSet<>();
     // sink 类名
     private static String insnMethodOwner;
-    // sink 类名集合
+    // sink 父类集合
     private static ArrayList<String> insnMethodOwners = new ArrayList<>();
     // sink 方法名
     private static String insnMethodName;
     // sink 方法描述
     private static String insnMethodDesc;
     // sink 信息
-    private static ArrayList<String> sinkInfo = new ArrayList<>();
+    // private static ArrayList<String> sinkInfo = new ArrayList<>();
     // source 信息
     private static String sourceInfo;
     private static String source;
@@ -75,13 +75,12 @@ public class InsnAnalysis {
     }
 
     /**
-     * 通过 sink 找调用者，并把 source 记录下来
+     * 通过 sink 找 source ，并将 source 记录下来
      *
-     * @param sink   目标调用规则
-     * @param depth  最大递归深度
-     * @param ruls   规则限制
-     * @param count  递归深度
-//     * @param result 结果
+     * @param sink  目标调用规则
+     * @param depth 最大递归深度
+     * @param ruls  规则限制
+     * @param count 递归深度
      * @return
      */
     private static void findSource(String sink, SinkRule sinkRule, int depth, Rules ruls,
@@ -102,42 +101,50 @@ public class InsnAnalysis {
                     insnMethodDesc = wrapper.getMethodInsnNode().desc;
                     insnMethodOwner = wrapper.getMethodInsnNode().owner.replaceAll("/", "\\.");
 
-                    if (count == 1){
+                    if (count == 1) {
                         if (!sink.split(":")[1].equals(insnMethodName)) continue;
-                        if (sink.equals( insnMethodOwner + ":" + insnMethodName )) isFind = true;
-                    }else{
+                        if (sink.equals(insnMethodOwner + ":" + insnMethodName)) isFind = true;
+                    } else {
                         if (!sink.split(":")[1].equals(insnMethodName + insnMethodDesc)) continue;
-                        if (sink.equals( insnMethodOwner + ":" + insnMethodName + insnMethodDesc )) isFind = true;
+                        if (sink.equals(insnMethodOwner + ":" + insnMethodName + insnMethodDesc)) isFind = true;
                     }
 
+                    // 如果没找到，分别去看是否存在父类或是否为接口类
                     if (!isFind) {
-                        insnMethodOwners.clear();
-                        if (!nullOrNoSuperClasses.contains(insnMethodOwner)) {
-                            ClassInfo info = ClassRepo.getInstance().getClassInfo(insnMethodOwner);
-                            if (info != null) {
+                        ClassInfo info = ClassRepo.getInstance().getClassInfo(insnMethodOwner);
+                        if (info == null) nullOrNoSuperClasses.add(insnMethodOwner);
+                        else {
+                            if (!nullOrNoSuperClasses.contains(insnMethodOwner)) {
+
+                                insnMethodOwners.clear();
+
                                 if (info.getSuperClasses() == null) {
                                     findSuperClasses(insnMethodOwner);
-                                    if (insnMethodOwners.size() == 0)
-                                        nullOrNoSuperClasses.add(insnMethodOwner);
-                                    else
-                                        info.setSuperClasses((ArrayList<String>) insnMethodOwners.clone());
+                                    if (insnMethodOwners.size() == 0) nullOrNoSuperClasses.add(insnMethodOwner);
+                                    else info.setSuperClasses((ArrayList<String>) insnMethodOwners.clone());
                                 } else {
                                     insnMethodOwners = (ArrayList<String>) info.getSuperClasses().clone();
                                 }
-                            } else {
-                                nullOrNoSuperClasses.add(insnMethodOwner);
+
+                                for (String superName : insnMethodOwners){
+                                    if(superName.equals(sink.split(":")[0])){
+                                        isFind = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // 判断是否为接口类
+                            if (!isFind && ( info.getClassNode().access & Opcodes.ACC_INTERFACE ) != 0 ) {
+                                ArrayList<ClassInfo> intrfaceImpls = ClassRepo.getInstance().getInterfaces(insnMethodOwner);
+                                for (ClassInfo i : intrfaceImpls){
+                                    if (i.getClassName().equals(sink.split(":")[0])){
+                                        isFind = true;
+                                        break;
+                                    }
+                                }
                             }
                         }
-//                        log.info(insnMethodOwners.size() + ":" + insnMethodOwners);
-                        insnMethodOwners.add(insnMethodOwner);
-
-                        sinkInfo.clear();
-                        if (count == 1) {
-                            insnMethodOwners.forEach(s -> sinkInfo.add(s + ":" + insnMethodName));
-                        } else {
-                            insnMethodOwners.forEach(s -> sinkInfo.add(s + ":" + insnMethodName + insnMethodDesc));
-                        }
-                        isFind = sinkInfo.contains(sink);
                     }
 
                     // 如果根据规则找到的话
@@ -170,7 +177,7 @@ public class InsnAnalysis {
         }
     }
 
-    private static void findSuperClasses(String className){
+    private static void findSuperClasses(String className) {
         if (nullOrNoSuperClasses.contains(className))
             return;
         ClassInfo i = ClassRepo.getInstance().getClassInfo(className);
@@ -179,10 +186,10 @@ public class InsnAnalysis {
             if (!s.equals("java.lang.Object")) {
                 insnMethodOwners.add(s);
                 findSuperClasses(s);
-            }else{
+            } else {
                 nullOrNoSuperClasses.add(className);
             }
-        }else{
+        } else {
             nullOrNoSuperClasses.add(className);
         }
     }

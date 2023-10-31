@@ -1,10 +1,7 @@
 package com.mediocrity.model;
 
-import org.objectweb.asm.tree.ClassNode;
-
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -32,15 +29,6 @@ public class ClassRepo {
         return classes;
     }
 
-//    public String getClassInfo(String className){
-//        for (ClassInfo classInfo : classes){
-//            if (classInfo.getClassName().equals(className)){
-//                return classInfo.getClassName();
-//            }
-//        }
-//        return null;
-//    }
-
     public ClassInfo getClassInfo(String className){
         for (ClassInfo classInfo : classes){
             if (classInfo.getClassName().equals(className)){
@@ -48,5 +36,16 @@ public class ClassRepo {
             }
         }
         return null;
+    }
+
+    public ArrayList<ClassInfo> getInterfaces(String interfaceName){
+        interfaceName = interfaceName.replaceAll("\\.", "/");
+        ArrayList<ClassInfo> interfaces = new ArrayList<>();
+        for (ClassInfo classInfo : classes){
+            if (classInfo.getClassNode().interfaces.contains(interfaceName)){
+                interfaces.add(classInfo);
+            }
+        }
+        return interfaces;
     }
 }

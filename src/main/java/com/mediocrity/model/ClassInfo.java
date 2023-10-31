@@ -16,14 +16,8 @@ public class ClassInfo {
     private String jarName;
     private ArrayList<String> superClasses;
 
-//    public ClassInfo(ClassNode node, String jarName, ClassInfo superClasses) {
-//        classNode = node;
-//        this.jarName = jarName;
-//        this.superClasses = superClasses;
-//    }
-
-    public ClassInfo(ClassNode node, String jarName) {
-        classNode = node;
+    public ClassInfo(ClassNode classNode, String jarName) {
+        this.classNode = classNode;
         this.jarName = jarName;
     }
 

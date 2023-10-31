@@ -38,7 +38,7 @@ public class SinkFinder {
 
     public static void main(String[] args) {
         String format = "|%1$-5s|%2$-10s|%3$-6s|%4$-1s\n";
-        ArrayList<SinkResult> results = new ArrayList<>();
+        ArrayList<SinkResult> results;
 
         SinkFinder sinkFinder = new SinkFinder();
         sinkFinder.defaultParser(args);
@@ -49,7 +49,6 @@ public class SinkFinder {
 
         Rules ruls = (Rules) FileUtil.getJsonContent(SINK_RULE_FIlE, Rules.class);
 
-//        Boolean isSingleJar = false;
         readFile(target_file, ruls);
 
         if (!CUSTOM_SINK_RULE.isEmpty()) {
@@ -248,8 +247,10 @@ public class SinkFinder {
         java.util.Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String logFile = "";
-        if (CUSTOM_SINK_RULE == null){
-            logFile = "logs/vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_") + ".log";
+        if (CUSTOM_SINK_RULE.length()==0){
+            logFile =
+                    "logs/vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_").replaceAll("/", "_").replaceAll(":","_") +
+                    ".log";
         }else{
             logFile = "logs/vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
                     ".log";
