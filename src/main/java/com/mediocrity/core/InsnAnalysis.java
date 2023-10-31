@@ -12,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.objectweb.asm.Opcodes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 /**
  * @author: medi0cr1ty
@@ -21,20 +23,17 @@ import java.util.HashSet;
 @Slf4j
 public class InsnAnalysis {
 
-    private static HashSet<String> nullOrNoSuperClasses = new HashSet<>();
-    // sink 类名
+    private static HashSet<String> nullOrNoSubClasses = new HashSet<>();
     private static String insnMethodOwner;
-    // sink 父类集合
-    private static ArrayList<String> insnMethodOwners = new ArrayList<>();
-    // sink 方法名
     private static String insnMethodName;
-    // sink 方法描述
     private static String insnMethodDesc;
-    // sink 信息
-    // private static ArrayList<String> sinkInfo = new ArrayList<>();
-    // source 信息
     private static String sourceInfo;
     private static String source;
+
+    private static String sinkClass;
+    private static String sinkMethodDesc;
+
+    private static ArrayList<String> subClasses = new ArrayList<>();
 
     private static Boolean isFind;
 
@@ -47,7 +46,7 @@ public class InsnAnalysis {
 
         int count;
 
-        if (!ClassRepo.getInstance().listAll().isEmpty()) {
+        if (!ClassRepo.classes.entrySet().isEmpty()) {
             for (SinkRule sinkRule : ruls.getSinkRules()) {
                 for (String sink : sinkRule.getSinks()) {
                     log.info(sink + "规则开始执行...");
@@ -65,7 +64,7 @@ public class InsnAnalysis {
 
         int count = 1;
 
-        if (!ClassRepo.getInstance().listAll().isEmpty()) {
+        if (!ClassRepo.classes.entrySet().isEmpty()) {
             log.info(sink + "规则开始执行...");
             result.add(sink);
             findSource(sink, new SinkRule(), depth, ruls, count);
@@ -86,69 +85,55 @@ public class InsnAnalysis {
     private static void findSource(String sink, SinkRule sinkRule, int depth, Rules ruls,
                                    int count) {
 
-        for (ClassInfo classInfo : ClassRepo.getInstance().listAll()) {
-//            clsName = classInfo.getClassName();
+        for (Map.Entry<String, ClassInfo> classInfoEntry: ClassRepo.classes.entrySet()) {
 
-            if (RuleUtil.isIncluded(classInfo.getClassName(), ruls.getClassInclusions()) && !RuleUtil.isExcluded(classInfo.getClassName(), ruls.getClassExclusions())) {
-                for (WrapperNode wrapper : ASMUtil.getMethodCallsInClass(classInfo.getClassNode())) {
-//                    methodName = wrapper.getMethodNode().name;
+            if (RuleUtil.isIncluded(classInfoEntry.getKey(), ruls.getClassInclusions()) && !RuleUtil.isExcluded(classInfoEntry.getKey(), ruls.getClassExclusions())) {
+                for (WrapperNode wrapper : ASMUtil.getMethodCallsInClass(classInfoEntry.getValue().getClassNode())) {
                     isFind = false;
 
-                    source = classInfo.getClassName() + ":" + wrapper.getMethodNode().name;
-                    sourceInfo = classInfo.getClassInfo() + ":" + wrapper.getMethodNode().name;
+                    source = classInfoEntry.getKey() + ":" + wrapper.getMethodNode().name;
 
                     insnMethodName = wrapper.getMethodInsnNode().name;
                     insnMethodDesc = wrapper.getMethodInsnNode().desc;
-                    insnMethodOwner = wrapper.getMethodInsnNode().owner.replaceAll("/", "\\.");
+                    insnMethodOwner = wrapper.getMethodInsnNode().owner;
+
+                    sinkClass = sink.split(":")[0];
+                    sinkMethodDesc = sink.split(":")[1];
 
                     if (count == 1) {
-                        if (!sink.split(":")[1].equals(insnMethodName)) continue;
-                        if (sink.equals(insnMethodOwner + ":" + insnMethodName)) isFind = true;
+                        if (!sinkMethodDesc.equals(insnMethodName)) continue;
                     } else {
-                        if (!sink.split(":")[1].equals(insnMethodName + insnMethodDesc)) continue;
-                        if (sink.equals(insnMethodOwner + ":" + insnMethodName + insnMethodDesc)) isFind = true;
+                        if (!sinkMethodDesc.equals(insnMethodName + insnMethodDesc)) continue;
                     }
 
-                    // 如果没找到，分别去看是否存在父类或是否为接口类
-                    if (!isFind) {
-                        ClassInfo info = ClassRepo.getInstance().getClassInfo(insnMethodOwner);
-                        if (info == null) nullOrNoSuperClasses.add(insnMethodOwner);
+                    if (sinkClass.equals(insnMethodOwner.replaceAll("/", "\\."))) isFind = true;
+
+                    // 如果没找到直接调用关系，分别去看是否存在子类调用或接口类调用
+                    if ( !isFind ){
+                        ClassInfo info = ClassRepo.classes.get(sinkClass);
+                        if (info == null) nullOrNoSubClasses.add(sinkClass);
                         else {
-                            if (!nullOrNoSuperClasses.contains(insnMethodOwner)) {
-
-                                insnMethodOwners.clear();
-
-                                if (info.getSuperClasses() == null) {
-                                    findSuperClasses(insnMethodOwner);
-                                    if (insnMethodOwners.size() == 0) nullOrNoSuperClasses.add(insnMethodOwner);
-                                    else info.setSuperClasses((ArrayList<String>) insnMethodOwners.clone());
-                                } else {
-                                    insnMethodOwners = (ArrayList<String>) info.getSuperClasses().clone();
+                            if (!nullOrNoSubClasses.contains(sinkClass)) {
+                                subClasses.clear();
+                                if (info.getSubClasses().size()==0) {
+                                    findSubClasses(sinkClass);
+                                    if (subClasses.size() == 0) nullOrNoSubClasses.add(sinkClass);
+                                    else info.setSubClasses((ArrayList<String>) subClasses.clone());
                                 }
 
-                                for (String superName : insnMethodOwners){
-                                    if(superName.equals(sink.split(":")[0])){
-                                        isFind = true;
-                                        break;
-                                    }
-                                }
+                                if (info.getSubClasses().contains(sinkClass)) isFind = true;
                             }
 
-                            // 判断是否为接口类
-                            if (!isFind && ( info.getClassNode().access & Opcodes.ACC_INTERFACE ) != 0 ) {
-                                ArrayList<ClassInfo> intrfaceImpls = ClassRepo.getInstance().getInterfaces(insnMethodOwner);
-                                for (ClassInfo i : intrfaceImpls){
-                                    if (i.getClassName().equals(sink.split(":")[0])){
-                                        isFind = true;
-                                        break;
-                                    }
-                                }
+                            if ( !isFind ){
+                                if (info.getClassNode().interfaces.contains(insnMethodOwner)) isFind = true;
                             }
                         }
                     }
 
+                    sourceInfo = classInfoEntry.getValue().getJarName() + "#" + source;
+
                     // 如果根据规则找到的话
-                    if (isFind && !result.contains(sourceInfo)) {
+                    if ( isFind && !result.contains(sourceInfo) ) {
 
                         result.add(sourceInfo);
                         if (count < depth || depth == -1) {
@@ -177,20 +162,30 @@ public class InsnAnalysis {
         }
     }
 
-    private static void findSuperClasses(String className) {
-        if (nullOrNoSuperClasses.contains(className))
-            return;
-        ClassInfo i = ClassRepo.getInstance().getClassInfo(className);
-        if (i != null) {
-            String s = i.getClassNode().superName.replaceAll("/", "\\.");
-            if (!s.equals("java.lang.Object")) {
-                insnMethodOwners.add(s);
-                findSuperClasses(s);
-            } else {
-                nullOrNoSuperClasses.add(className);
+//    private static void findSuperClasses(String className) {
+//        if (nullOrNoSuperClasses.contains(className))
+//            return;
+//        ClassInfo i = ClassRepo.getInstance().getClassInfo(className);
+//        if (i != null) {
+//            String s = i.getClassNode().superName.replaceAll("/", "\\.");
+//            if (!s.equals("java.lang.Object")) {
+//                insnMethodOwners.add(s);
+//                findSuperClasses(s);
+//            } else {
+//                nullOrNoSuperClasses.add(className);
+//            }
+//        } else {
+//            nullOrNoSuperClasses.add(className);
+//        }
+//    }
+
+    public static void findSubClasses(String superName){
+        for (Map.Entry<String, ClassInfo> classInfoEntry: ClassRepo.classes.entrySet()){
+            if (classInfoEntry.getValue().getClassNode().superName.replaceAll("/", "\\.").contains(superName)){
+                subClasses.add(classInfoEntry.getKey());
+                findSubClasses(classInfoEntry.getKey());
+                break;
             }
-        } else {
-            nullOrNoSuperClasses.add(className);
         }
     }
 }

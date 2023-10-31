@@ -1,15 +1,15 @@
 {
   "path_exclusions": ["AndroidSDK",".idea","resources",".git","META-INF"],
-  "jar_name_inclusions": ["*","weblogic","coherence"],
+  "jar_name_inclusions": ["base","weblogic","coherence"],
   "jar_name_exclusions": ["sinkfinder-2","spring-boot","logback","lombok","META-INF","log4j","slf4j",
     "spring-context","tomcat-embed-core","spring-web","mysql-connector-java","antlr-"],
-  "class_inclusions": ["venustech"],
+  "class_inclusions": ["edr"],
   "class_exclusions": ["logback","lombok","org.springframework.boot.loader"],
   "sink_rules": [
     {
       "sink_name": "RCE",
       "severity_level": "High",
-      "sinks": ["java.lang.Runtime:exec","java.lang.ProcessBuilder:start","javax.script.ScriptEngine:eval"]
+      "sinks": ["java.lang.Runtime:exec","java.lang.ProcessBuilder:<init>","java.lang.ProcessBuilder:start","javax.script.ScriptEngine:eval"]
     },{
       "sink_name": "UNSERIALIZE",
       "severity_level": "High",

@@ -10,6 +10,7 @@ import org.objectweb.asm.tree.ClassNode;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
@@ -137,7 +138,7 @@ public class JarReaderUtil {
             new ClassReader(streamBuilder.toByteArray()).accept(node, ClassReader.SKIP_FRAMES);
 
             final ClassInfo classInfo = new ClassInfo(node, jarName);
-            ClassRepo.getInstance().listAll().add(classInfo);
+            ClassRepo.classes.put(node.name.replaceAll("/","\\."), classInfo);
         } catch (IOException e) {
             e.printStackTrace();
         }

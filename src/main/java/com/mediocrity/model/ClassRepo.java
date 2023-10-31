@@ -1,8 +1,6 @@
 package com.mediocrity.model;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author: medi0cr1ty
@@ -10,42 +8,34 @@ import java.util.Set;
  */
 public class ClassRepo {
 
-    private static ClassRepo instance;
-    private final Set<ClassInfo> classes;
+//    private static ClassRepo instance;
+    public static final HashMap<String, ClassInfo> classes = new HashMap<>();
+//    public static ArrayList<String> subClasses = new ArrayList<>();
 
-    public ClassRepo() {
-        this.classes = new HashSet<>();
-    }
+//    public ClassRepo() {
+//        this.classes = new HashMap<>();
+//    }
 
-    public static ClassRepo getInstance() {
-        if (instance == null) {
-            instance = new ClassRepo();
-        }
+//    public static ClassRepo getInstance() {
+//        if (instance == null) {
+//            instance = new ClassRepo();
+//        }
+//
+//        return instance;
+//    }
 
-        return instance;
-    }
+//    public HashMap<String, ClassInfo> listAll() {
+//        return classes;
+//    }
 
-    public Set<ClassInfo> listAll() {
-        return classes;
-    }
+//    public ClassInfo getClassInfo(String className){
+//        for (ClassInfo classInfo : classes){
+//            if (classInfo.getClassName().equals(className)){
+//                return classInfo;
+//            }
+//        }
+//        return null;
+//    }
 
-    public ClassInfo getClassInfo(String className){
-        for (ClassInfo classInfo : classes){
-            if (classInfo.getClassName().equals(className)){
-                return classInfo;
-            }
-        }
-        return null;
-    }
 
-    public ArrayList<ClassInfo> getInterfaces(String interfaceName){
-        interfaceName = interfaceName.replaceAll("\\.", "/");
-        ArrayList<ClassInfo> interfaces = new ArrayList<>();
-        for (ClassInfo classInfo : classes){
-            if (classInfo.getClassNode().interfaces.contains(interfaceName)){
-                interfaces.add(classInfo);
-            }
-        }
-        return interfaces;
-    }
 }
