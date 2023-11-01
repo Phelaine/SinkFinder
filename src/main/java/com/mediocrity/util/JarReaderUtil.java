@@ -143,7 +143,7 @@ public class JarReaderUtil {
             new ClassReader(streamBuilder.toByteArray()).accept(node, ClassReader.SKIP_FRAMES);
 
             if (jarName.indexOf("@") > 0){
-                jarName = jarName.replaceAll("(?<=.{"+jarName.indexOf("@")+"})\\d{19}", "");
+                jarName = jarName.replaceAll("@\\d+", "@");
             }
 
             final ClassInfo classInfo = new ClassInfo(node, jarName);
