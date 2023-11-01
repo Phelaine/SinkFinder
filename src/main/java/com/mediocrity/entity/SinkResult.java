@@ -15,7 +15,7 @@ public class SinkResult{
     public String sinkCata;
     public String sinkLevel;
     public ArrayList<String> invokeDetail;
-    private String format = "|%1$-5s|%2$-10s|%3$-6s|%4$-1s\n";
+    private String format = "|%1$-5s|%2$-10s|%3$-6s|%4$-1s|";
 
     public SinkResult(int count, String sinkName, String severityLevel, ArrayList<String> result) {
         this.invokeLength = count;
