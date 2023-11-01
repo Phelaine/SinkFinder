@@ -38,11 +38,11 @@ public class InsnAnalysis {
     private static Boolean isFind;
 
     private static ArrayList<String> result = new ArrayList<>();
-    private static ArrayList<SinkResult> finalResult = new ArrayList<>();
+    private static HashSet<SinkResult> finalResult = new HashSet<>();
 
     private static Boolean isRecord = true;
 
-    public static ArrayList<SinkResult> run(Rules ruls, int depth) {
+    public static HashSet<SinkResult> run(Rules ruls, int depth) {
 
         int count;
 
@@ -60,7 +60,7 @@ public class InsnAnalysis {
         return finalResult;
     }
 
-    public static ArrayList<SinkResult> runSink(Rules ruls, String sink, int depth) {
+    public static HashSet<SinkResult> runSink(Rules ruls, String sink, int depth) {
 
         int count = 1;
 
@@ -118,7 +118,7 @@ public class InsnAnalysis {
                                 if (info.getSubClasses().size()==0) {
                                     findSubClasses(sinkClass);
                                     if (subClasses.size() == 0) nullOrNoSubClasses.add(sinkClass);
-                                    else info.setSubClasses((ArrayList<String>) subClasses.clone());
+                                    else ClassRepo.classes.get(sinkClass).setSubClasses((ArrayList<String>) subClasses.clone());
                                 }
 
                                 if (info.getSubClasses().contains(sinkClass)) isFind = true;

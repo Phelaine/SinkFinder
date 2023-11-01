@@ -38,7 +38,7 @@ public class SinkFinder {
 
     public static void main(String[] args) {
         String format = "|%1$-5s|%2$-10s|%3$-6s|%4$-1s\n";
-        ArrayList<SinkResult> results;
+        HashSet<SinkResult> results;
 
         SinkFinder sinkFinder = new SinkFinder();
         sinkFinder.defaultParser(args);
@@ -57,7 +57,8 @@ public class SinkFinder {
             results = InsnAnalysis.run(ruls, RECURSION_DEPTH);
         }
 
-        Collections.sort(results, new Comparator<SinkResult>() {
+        ArrayList<SinkResult> sortResults = new ArrayList<>(results);
+        Collections.sort(sortResults, new Comparator<SinkResult>() {
             @Override
             public int compare(SinkResult o1, SinkResult o2) {
                 return o2.invokeLength - o1.invokeLength;
@@ -65,7 +66,7 @@ public class SinkFinder {
         });
 
         //文件记录
-        for (SinkResult sinkResult : results)
+        for (SinkResult sinkResult : sortResults)
             sinkFinder.sinkLog(String.format(format, sinkResult.invokeLength, sinkResult.sinkCata, sinkResult.sinkLevel,
                     String.join("\t", sinkResult.invokeDetail)));
 
@@ -249,7 +250,7 @@ public class SinkFinder {
         String logFile = "";
         if (CUSTOM_SINK_RULE.length()==0){
             logFile =
-                    "logs/vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_").replaceAll("/", "_").replaceAll(":","_") +
+                    "logs/vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_").replaceAll("\\\\", "_").replaceAll(":","") +
                     ".log";
         }else{
             logFile = "logs/vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
