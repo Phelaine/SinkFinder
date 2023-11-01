@@ -8,6 +8,8 @@ import com.mediocrity.util.JarReaderUtil;
 import com.mediocrity.util.RuleUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.sql.*;
@@ -22,6 +24,7 @@ import java.util.Date;
 
 @Slf4j
 public class SinkFinder {
+    private static final Logger logger = LoggerFactory.getLogger(SinkFinder.class);
 
     public static String SINK_RULE_FIlE = "rules.json";
 
@@ -43,7 +46,7 @@ public class SinkFinder {
         SinkFinder sinkFinder = new SinkFinder();
         sinkFinder.defaultParser(args);
 
-        log.info("SinkFinder 启动 ...");
+        logger.info("SinkFinder 启动 ...");
 
         File target_file = new File(TARGET_PATH);
 
@@ -74,7 +77,7 @@ public class SinkFinder {
 //        if (!DATABASE_ADDR.isEmpty())
 //            sinkFinder.databaseStore(results);
 
-        log.info("任务完成！");
+        logger.info("任务完成！");
     }
 
     public static void readFile(File dir, Rules ruls) {
@@ -127,7 +130,7 @@ public class SinkFinder {
         Option target = Option.builder("s").longOpt("sink")
                 .hasArg()
                 .required(false)
-                .desc("自定义 sink 规则（默认无限递归下去）").build();
+                .desc("自定义 sink 规则").build();
         options.addOption(target);
 
         Option depth = Option.builder("d").longOpt("depth")
@@ -238,7 +241,7 @@ public class SinkFinder {
     }
 
     public void sinkLog(String msg) {
-//        System.out.println(msg);
+        logger.info(msg);
 
         try {
             File d = new File("logs");
@@ -247,10 +250,10 @@ public class SinkFinder {
         }
         java.util.Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String logFile = "";
+        String logFile;
         if (CUSTOM_SINK_RULE.length()==0){
             logFile =
-                    "logs/vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_").replaceAll("\\\\", "_").replaceAll(":","") +
+                    "logs/vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_").replaceAll("\\\\", "_").replaceAll("/", "_").replaceAll(":","") +
                     ".log";
         }else{
             logFile = "logs/vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +

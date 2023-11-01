@@ -6,6 +6,8 @@ import com.mediocrity.model.ClassRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -23,6 +25,7 @@ import java.util.zip.ZipFile;
  */
 @Slf4j
 public class JarReaderUtil {
+    private static final Logger logger = LoggerFactory.getLogger(JarReaderUtil.class);
 
     /**
      * 读取 Class文件并转换为 ClassNode.
@@ -49,12 +52,12 @@ public class JarReaderUtil {
         }
 
         if (RuleUtil.isIncluded(name, ruls.getJarNameInclusions())) {
-            log.info(jar.getName());
+            logger.info(jar.getName());
             try (final JarInputStream jis = new JarInputStream(new ByteArrayInputStream(Files.readAllBytes(jar.toPath())))) {
 
                 JarEntry jarEntry;
                 while ((jarEntry = jis.getNextJarEntry()) != null) {
-                    final String itemName = jarEntry.getName();
+                    String itemName = jarEntry.getName();
 
                     if (itemName.endsWith(".class") || itemName.endsWith(".class/")) {
                         if (RuleUtil.isExcluded(itemName.replaceAll("/", "\\."), ruls.getClassExclusions())) {
@@ -62,8 +65,8 @@ public class JarReaderUtil {
                         }
                         streamToNode(jis, jar.getName());
                     }
-                    if (itemName.endsWith(".jar") && (!RuleUtil.isExcluded(itemName, ruls.getJarNameExclusions()))) {
-                        readJar(jis, ruls);
+                    if (itemName.endsWith(".jar")) {
+                        readJar(jar.getName().substring(0, jar.getName().lastIndexOf(".")), jis, ruls);
                     }
                 }
             } catch (Exception e) {
@@ -92,17 +95,19 @@ public class JarReaderUtil {
         }
     }
 
-    private static void readJar(JarInputStream jis, Rules ruls) throws IOException {
+    private static void readJar(String name, JarInputStream jis, Rules ruls) throws IOException {
 
         JarEntry jarEntry;
         while ((jarEntry = jis.getNextJarEntry()) != null) {
-            final String itemName = jarEntry.getName();
-            File tempFile = File.createTempFile(itemName, ".jar");
+            String itemName = jarEntry.getName().split("/")[jarEntry.getName().split("/").length-1];
+            if ( !RuleUtil.isExcluded(itemName, ruls.getJarNameExclusions()) && RuleUtil.isIncluded(itemName,
+                    ruls.getJarNameInclusions()) ) {
+                File tempFile = File.createTempFile(name + "@", itemName);
 
-            jarInputStreamToFile(jis, tempFile);
+                jarInputStreamToFile(jis, tempFile);
 
-            readJar(tempFile, ruls);
-
+                readJar(tempFile, ruls);
+            }
         }
     }
 
@@ -136,6 +141,10 @@ public class JarReaderUtil {
 
             final ClassNode node = new ClassNode();
             new ClassReader(streamBuilder.toByteArray()).accept(node, ClassReader.SKIP_FRAMES);
+
+            if (jarName.indexOf("@") > 0){
+                jarName = jarName.replaceAll("(?<=.{"+jarName.indexOf("@")+"})\\d{19}", "");
+            }
 
             final ClassInfo classInfo = new ClassInfo(node, jarName);
             ClassRepo.classes.put(node.name.replaceAll("/","\\."), classInfo);

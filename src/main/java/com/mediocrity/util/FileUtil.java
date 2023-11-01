@@ -9,9 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 
 /**
- * @Project: sinkfinder
- * @ClassName: FileUtil
- * @Author: TheKingOfDuck
+ * @author: medi0cr1ty
+ * @date: 2023/10/13
  */
 public class FileUtil {
     public static Object getJsonContent(String path, Class<?> type){
@@ -19,7 +18,7 @@ public class FileUtil {
         if(!file.exists()) {
             return null;
         }
-        FileReader reader = null;
+        FileReader reader;
         try {
             reader = new FileReader(file);
             GsonBuilder gsonBuilder = new GsonBuilder();
@@ -31,11 +30,5 @@ public class FileUtil {
         }
         return null;
     }
-//
-//    public String covertPath(String s){
-//        s = s.replaceAll("/", "\\.");
-////        s = s.replaceAll("\\\\", "\\.");
-//        return s;
-//    }
 
 }

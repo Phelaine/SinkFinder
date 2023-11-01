@@ -8,8 +8,6 @@ import java.util.ArrayList;
  */
 public class RuleUtil {
 
-//    public static Boolean allInclude;
-
     /**
      * 根据规则判断是否排除
      *
@@ -18,9 +16,6 @@ public class RuleUtil {
      * @return True or False.
      */
     public static boolean isExcluded(String excludeKey, ArrayList<String> rules) {
-
-        // org/springframework/boot 转换为 org.springframework.boot
-//        excludeKey = excludeKey.replaceAll("/", "\\.");
 
         for (String exclusion : rules) {
             if (excludeKey.contains(exclusion)) {
@@ -41,15 +36,7 @@ public class RuleUtil {
      */
     public static boolean isIncluded(String includeKey, ArrayList<String> rules) {
 
-//        allInclude = false;
-        // org/springframework/boot 转换为 org.springframework.boot
-//        includeKey = includeKey.replaceAll("/", "\\.");
-
         for (String inclusion : rules) {
-//            if (inclusion.equals("*")){
-//                allInclude = true;
-//                return true;
-//            } else
             if (includeKey.contains(inclusion) || inclusion.equals("*")) {
                 return true;
             }
