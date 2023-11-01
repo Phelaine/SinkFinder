@@ -29,7 +29,7 @@
     },{
       "sink_name": "JDBC",
       "severity_level": "High",
-      "sinks": ["com.mysql.cj.jdbc.result.ResultSetImpl:getObject"]
+      "sinks": ["com.mysql.cj.jdbc.result.ResultSetImpl:getObject", "java.sql.DriverManager:getConnection"]
     },{
       "sink_name": "ZIPSLIP",
       "severity_level": "High",

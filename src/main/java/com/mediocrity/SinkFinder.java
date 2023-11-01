@@ -40,7 +40,7 @@ public class SinkFinder {
     public static String DATABASE_PASS = "";
 
     public static void main(String[] args) {
-        String format = "|%1$-5s|%2$-10s|%3$-6s|%4$-1s\n";
+        String format = "|%1$-5s|%2$-10s|%3$-6s|%4$-1s|";
         HashSet<SinkResult> results;
 
         SinkFinder sinkFinder = new SinkFinder();
@@ -262,7 +262,7 @@ public class SinkFinder {
         try {
             File file = new File(logFile);
             FileWriter fileWriter = new FileWriter(file, true);
-            fileWriter.write(msg);
+            fileWriter.write(msg+"\n");
             fileWriter.flush();
             fileWriter.close();
         } catch (Exception e) {
