@@ -1,6 +1,6 @@
 package com.mediocrity;
 
-import com.mediocrity.core.InsnAnalysis;
+import com.mediocrity.service.InsnAnalysis;
 import com.mediocrity.entity.Rules;
 import com.mediocrity.entity.SinkResult;
 import com.mediocrity.util.FileUtil;
@@ -63,7 +63,6 @@ public class SinkFinder {
         File log = new File("logs" + File.separator + LOG_FILE);
         if (log.exists())log.delete();
 
-
         logger.info("SinkFinder 启动 ...");
 
         File target_file = new File(TARGET_PATH);
@@ -106,14 +105,13 @@ public class SinkFinder {
                 if (file.isFile() && (file.getName().endsWith(".class") || file.getName().endsWith(".class/") || file.getName().endsWith(".jar") || file.getName().endsWith(".zip"))) {
                     JarReaderUtil.readJar(file, ruls);
                 } else {
-                    String path = file.getAbsolutePath();
+                    String path = file.getName();
                     if (!RuleUtil.isExcluded(path, ruls.getPathExclusions())) {
                         readFile(file, ruls);
                     }
                 }
             }
         } else if (dir.isFile() && (dir.getName().endsWith(".class") || dir.getName().endsWith(".class/") || dir.getName().endsWith(".jar") || dir.getName().endsWith(".zip"))) {
-//            isSingleJar = true;
             JarReaderUtil.readJar(dir, ruls);
         }
     }
