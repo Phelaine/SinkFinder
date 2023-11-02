@@ -262,7 +262,7 @@ public class SinkFinder {
         try {
             File file = new File(logFile);
             FileWriter fileWriter = new FileWriter(file, true);
-            fileWriter.write(msg + "\n");
+            fileWriter.write(msg+"\n");
             fileWriter.flush();
             fileWriter.close();
         } catch (Exception e) {

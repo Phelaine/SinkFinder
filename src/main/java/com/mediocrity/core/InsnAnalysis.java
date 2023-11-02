@@ -95,7 +95,7 @@ public class InsnAnalysis {
                 for (WrapperNode wrapper : ASMUtil.getMethodCallsInClass(classInfoEntry.getValue().getClassNode())) {
                     isFind = false;
 
-                    source = classInfoEntry.getKey() + ":" + wrapper.getMethodNode().name;
+                    source = classInfoEntry.getKey() + ":" + wrapper.getMethodNode().name + wrapper.getMethodNode().desc;
 
                     insnMethodName = wrapper.getMethodInsnNode().name;
                     insnMethodDesc = wrapper.getMethodInsnNode().desc;
@@ -143,7 +143,7 @@ public class InsnAnalysis {
                         count++;
                         isRecord = true;
                         if (count < depth || depth == -1) {
-                            findSource(source + wrapper.getMethodNode().desc, sinkRule, depth, ruls);
+                            findSource(source, sinkRule, depth, ruls);
                         }
                         if ( isRecord ) {
                             SinkResult s;
