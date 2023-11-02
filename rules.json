@@ -1,9 +1,9 @@
 {
   "path_exclusions": ["AndroidSDK",".idea","resources",".git","META-INF"],
-  "jar_name_inclusions": ["*","weblogic","coherence"],
+  "jar_name_inclusions": ["chat","hutool"],
   "jar_name_exclusions": ["sinkfinder-2","spring-boot","logback","lombok","META-INF","log4j","slf4j",
     "spring-context","tomcat-embed-core","spring-web","mysql-connector-java","antlr-"],
-  "class_inclusions": ["edr"],
+  "class_inclusions": ["*"],
   "class_exclusions": ["logback","lombok","org.springframework.boot.loader"],
   "sink_rules": [
     {
@@ -29,7 +29,7 @@
     },{
       "sink_name": "JDBC",
       "severity_level": "High",
-      "sinks": ["com.mysql.cj.jdbc.result.ResultSetImpl:getObject", "java.sql.DriverManager:getConnection"]
+      "sinks": ["com.mysql.cj.jdbc.result.ResultSetImpl:getObject", "java.sql.DriverManager:getConnection","java.sql.Driver:connect"]
     },{
       "sink_name": "ZIPSLIP",
       "severity_level": "High",
