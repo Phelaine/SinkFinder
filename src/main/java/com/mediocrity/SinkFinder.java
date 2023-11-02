@@ -28,6 +28,8 @@ public class SinkFinder {
 
     public static String SINK_RULE_FIlE = "rules.json";
 
+    public static String LOG_FILE = "vulns.log";
+
     public static String TARGET_PATH = ".";
 
     public static int RECURSION_DEPTH = 1;
@@ -45,6 +47,22 @@ public class SinkFinder {
 
         SinkFinder sinkFinder = new SinkFinder();
         sinkFinder.defaultParser(args);
+
+        java.util.Date day = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        if (CUSTOM_SINK_RULE.length()==0){
+            LOG_FILE =
+                    "vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_").replaceAll("\\\\", "_").replaceAll("/", "_").replaceAll(":","") +
+                            ".log";
+        }else{
+            LOG_FILE = "vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
+                    ".log";
+        }
+
+        File log = new File("logs" + File.separator + LOG_FILE);
+        if (log.exists())log.delete();
+
 
         logger.info("SinkFinder 启动 ...");
 
@@ -248,19 +266,10 @@ public class SinkFinder {
             d.mkdir();
         } catch (Exception e) {
         }
-        java.util.Date day = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String logFile;
-        if (CUSTOM_SINK_RULE.length()==0){
-            logFile =
-                    "logs/vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_").replaceAll("\\\\", "_").replaceAll("/", "_").replaceAll(":","") +
-                    ".log";
-        }else{
-            logFile = "logs/vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
-                    ".log";
-        }
+
+
         try {
-            File file = new File(logFile);
+            File file = new File("logs" + File.separator + LOG_FILE);
             FileWriter fileWriter = new FileWriter(file, true);
             fileWriter.write(msg+"\n");
             fileWriter.flush();
