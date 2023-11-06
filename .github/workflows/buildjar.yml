@@ -21,11 +21,9 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
-
-
     - name: Get current date
-        id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M')"
+      run: |
+        echo "RELEASE_DATE=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_ENV
     - name: Move jar
       run: |
         mkdir build && cp target/*.jar build
@@ -40,6 +38,6 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "${{ env.RELEASE_VERSION }}"
         prerelease: false
-        title: "Release ${{ steps.date.outputs.date }}"
+        title: "Release ${{ env.RELEASE_DATE }}"
         files: |
           build/*.jar
