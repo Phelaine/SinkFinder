@@ -6,7 +6,6 @@ import com.mediocrity.entity.SinkResult;
 import com.mediocrity.util.FileUtil;
 import com.mediocrity.util.JarReaderUtil;
 import com.mediocrity.util.RuleUtil;
-import com.mediocrity.util.TextTable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -43,8 +42,6 @@ public class SinkFinder {
     public static String DATABASE_PASS = "";
 
     public static void main(String[] args) {
-        java.util.Date day = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         HashSet<SinkResult> results;
 
@@ -73,32 +70,8 @@ public class SinkFinder {
             }
         });
 
-        if (CUSTOM_SINK_RULE.length() == 0) LOG_FILE = "vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.",
-                "_").replaceAll("\\\\", "_").replaceAll("/", "_").replaceAll(":","") +
-                            ".log";
-        else LOG_FILE = "vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
-                    ".log";
-
-        File log = new File("logs" + File.separator + LOG_FILE);
-        if (log.exists())log.delete();
-
         //文件记录
-        int count = 0;
-        for (SinkResult sinkResult : sortResults){
-            count++;
-            sinkFinder.sinkLog(count + " - " + sinkResult.sinkCata + " - " +
-                    sinkResult.sinkLevel + " - " + sinkResult.getInvokeDetail().get(0));
-            String[] header = {"Count", "Class & Method", "Method Signature", "Jar/Class"};
-            String[][] rows = new String[sinkResult.getInvokeLength()][4];
-            for (int i = 0; i < sinkResult.getInvokeLength(); i++) {
-                String vul = sinkResult.getInvokeDetail().get(i+1);
-                rows[i][0] = String.valueOf(i+1);
-                rows[i][1] = vul.substring(vul.indexOf('#') + 1, vul.indexOf('('));
-                rows[i][2] = vul.substring(vul.indexOf('('));
-                rows[i][3] = vul.substring(0, vul.indexOf('#'));
-            }
-            sinkFinder.sinkLog(new TextTable(header, rows).toString());
-        }
+        sinkFinder.fileStore(sortResults);
 
 //        //数据库存储
 //        if (!DATABASE_ADDR.isEmpty())
@@ -125,6 +98,115 @@ public class SinkFinder {
             JarReaderUtil.readJar(dir, ruls);
         }
     }
+
+    private void fileStore(ArrayList<SinkResult> sortResults){
+        java.util.Date day = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        if (CUSTOM_SINK_RULE.length() == 0) LOG_FILE = "vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.",
+                "_").replaceAll("\\\\", "_").replaceAll("/", "_").replaceAll(":","") +
+                ".log";
+        else LOG_FILE = "vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
+                ".log";
+
+        File log = new File("logs" + File.separator + LOG_FILE);
+        if (log.exists())log.delete();
+
+        int count = 0;
+        for (SinkResult sinkResult : sortResults){
+            count++;
+            this.sinkLog(count + " - " + sinkResult.sinkCata + " - " +
+                    sinkResult.sinkLevel + " - " + sinkResult.getInvokeDetail().get(0));
+
+            this.sinkLog(sinkResult.toString(false));
+        }
+    }
+
+    public void sinkLog(String msg) {
+//        logger.info(msg);
+
+        try {
+            File d = new File("logs");
+            d.mkdir();
+        } catch (Exception e) {
+        }
+
+        try {
+            File file = new File("logs" + File.separator + LOG_FILE);
+            FileWriter fileWriter = new FileWriter(file, true);
+            fileWriter.write(msg+"\n");
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (Exception e) {
+        }
+
+    }
+
+//    private void databaseStore(ArrayList<SinkResult> results){
+//        try {
+//            Class.forName("com.mysql.cj.jdbc.Driver");
+//            // 建立数据库连接
+//            String url = "jdbc:mysql://"+DATABASE_ADDR+"/"+DATABASE_NAME;
+//            String username = DATABASE_USER;
+//            String password = DATABASE_PASS;
+////            Collections.sort(results, new Comparator<SinkResult>() {
+////                @Override
+////                public int compare(SinkResult o1, SinkResult o2) {
+////                    return o2.invokeLength - o1.invokeLength;
+////                }
+////            });
+//
+//            int feildLen = results.get(0).invokeLength;
+//
+//            Connection connection = DriverManager.getConnection(url, username, password);
+//            String createTableSQL = "CREATE TABLE IF NOT EXISTS " + "venustech" +
+//                    "(count INT NOT NULL," +
+//                    "sinkcata VARCHAR(45) NOT NULL," +
+//                    "level VARCHAR(45) NOT NULL," +
+//                    "result VARCHAR(255)," +
+//                    "result1 VARCHAR(255)";
+//
+//            for (int i = 2; i<feildLen; i++) {
+//                createTableSQL += ",result"+i+" VARCHAR(255)";
+//            }
+//            createTableSQL += ")";
+//
+//            try (Statement statement = connection.createStatement()) {
+//                statement.executeUpdate(createTableSQL);
+//            }
+//
+//            for (SinkResult sinkResult : results) {
+//
+//                int len = sinkResult.invokeLength;
+//
+//                String insertSQL = "INSERT INTO venustech (count, sinkcata, level, result, result1";
+//                for (int i = 2; i < len; i++) {
+//                    insertSQL += ",result" + i;
+//                }
+//                insertSQL += ") VALUES (?,?,?,?,?";
+//                for (int i = 2; i < len; i++) {
+//                    insertSQL += ",?";
+//                }
+//                insertSQL += ")";
+//
+//                try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+//                    preparedStatement.setString(1, String.valueOf(sinkResult.invokeLength));
+//                    preparedStatement.setString(2, sinkResult.sinkCata);
+//                    preparedStatement.setString(3, sinkResult.sinkLevel);
+//                    preparedStatement.setString(4, sinkResult.invokeDetail.get(0));
+//                    preparedStatement.setString(5, sinkResult.invokeDetail.get(1));
+//                    for (int i = 2; i < len; i++) {
+//                        preparedStatement.setString(4+i, sinkResult.invokeDetail.get(i));
+//                    }
+//                    // 执行插入操作
+//                    preparedStatement.execute();
+//                }
+//            }
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//
+//    }
 
     private void defaultParser(String[] args) {
 
@@ -266,90 +348,5 @@ public class SinkFinder {
 
     }
 
-    public void sinkLog(String msg) {
-//        logger.info(msg);
-
-        try {
-            File d = new File("logs");
-            d.mkdir();
-        } catch (Exception e) {
-        }
-
-        try {
-            File file = new File("logs" + File.separator + LOG_FILE);
-            FileWriter fileWriter = new FileWriter(file, true);
-            fileWriter.write(msg+"\n");
-            fileWriter.flush();
-            fileWriter.close();
-        } catch (Exception e) {
-        }
-
-    }
-
-    private void databaseStore(ArrayList<SinkResult> results){
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            // 建立数据库连接
-            String url = "jdbc:mysql://"+DATABASE_ADDR+"/"+DATABASE_NAME;
-            String username = DATABASE_USER;
-            String password = DATABASE_PASS;
-//            Collections.sort(results, new Comparator<SinkResult>() {
-//                @Override
-//                public int compare(SinkResult o1, SinkResult o2) {
-//                    return o2.invokeLength - o1.invokeLength;
-//                }
-//            });
-
-            int feildLen = results.get(0).invokeLength;
-
-            Connection connection = DriverManager.getConnection(url, username, password);
-            String createTableSQL = "CREATE TABLE IF NOT EXISTS " + "venustech" +
-                    "(count INT NOT NULL," +
-                    "sinkcata VARCHAR(45) NOT NULL," +
-                    "level VARCHAR(45) NOT NULL," +
-                    "result VARCHAR(255)," +
-                    "result1 VARCHAR(255)";
-
-            for (int i = 2; i<feildLen; i++) {
-                createTableSQL += ",result"+i+" VARCHAR(255)";
-            }
-            createTableSQL += ")";
-
-            try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate(createTableSQL);
-            }
-
-            for (SinkResult sinkResult : results) {
-
-                int len = sinkResult.invokeLength;
-
-                String insertSQL = "INSERT INTO venustech (count, sinkcata, level, result, result1";
-                for (int i = 2; i < len; i++) {
-                    insertSQL += ",result" + i;
-                }
-                insertSQL += ") VALUES (?,?,?,?,?";
-                for (int i = 2; i < len; i++) {
-                    insertSQL += ",?";
-                }
-                insertSQL += ")";
-
-                try (PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
-                    preparedStatement.setString(1, String.valueOf(sinkResult.invokeLength));
-                    preparedStatement.setString(2, sinkResult.sinkCata);
-                    preparedStatement.setString(3, sinkResult.sinkLevel);
-                    preparedStatement.setString(4, sinkResult.invokeDetail.get(0));
-                    preparedStatement.setString(5, sinkResult.invokeDetail.get(1));
-                    for (int i = 2; i < len; i++) {
-                        preparedStatement.setString(4+i, sinkResult.invokeDetail.get(i));
-                    }
-                    // 执行插入操作
-                    preparedStatement.execute();
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-    }
 }
 

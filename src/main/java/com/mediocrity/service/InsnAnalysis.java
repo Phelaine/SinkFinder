@@ -152,7 +152,7 @@ public class InsnAnalysis {
                                 s = new SinkResult(count, sinkRule.getSinkName(), sinkRule.getSeverityLevel(), (ArrayList<String>) result.clone());
                             }
                             finalResult.add(s);
-                            logger.debug(s.toString());
+                            logger.debug("\n" + s.invokeLength + " - " + s.sinkCata + " - " + s.sinkLevel + " - " + s.getInvokeDetail().get(0) + "\n" + s.toString(true));
                         }
                         count--;
                         result.remove(result.size() - 1);
