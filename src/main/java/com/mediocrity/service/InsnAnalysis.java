@@ -45,34 +45,18 @@ public class InsnAnalysis {
 
     private static int count = 0;
 
-    public static HashSet<SinkResult> run(Rules ruls, int depth) {
-
-//        int count;
+    public static HashSet<SinkResult> run(Rules ruls) {
 
         if (!ClassRepo.classes.entrySet().isEmpty()) {
             for (SinkRule sinkRule : ruls.getSinkRules()) {
                 for (String sink : sinkRule.getSinks()) {
                     logger.info(sink + "规则开始执行...");
                     result.clear();
-//                    count = 0;
                     result.add(sink);
-                    findSource(sink, sinkRule, depth, ruls);
+                    findSource(sink, sinkRule, ruls);
                 }
             }
         }
-        return finalResult;
-    }
-
-    public static HashSet<SinkResult> runSink(Rules ruls, String sink, int depth) {
-
-//        int count = 0;
-
-        if (!ClassRepo.classes.entrySet().isEmpty()) {
-            logger.info(sink + "规则开始执行...");
-            result.add(sink);
-            findSource(sink, new SinkRule(), depth, ruls);
-        }
-
         return finalResult;
     }
 
@@ -80,12 +64,12 @@ public class InsnAnalysis {
      * 通过 sink 找 source ，并将 source 记录下来
      *
      * @param sink  目标调用规则
-     * @param depth 最大递归深度
+//     * @param depth 最大递归深度
      * @param ruls  规则限制
 //     * @param count 递归深度
      * @return
      */
-    private static void findSource(String sink, SinkRule sinkRule, int depth, Rules ruls) {
+    private static void findSource(String sink, SinkRule sinkRule, Rules ruls) {
 
         for (Map.Entry<String, ClassInfo> classInfoEntry: ClassRepo.classes.entrySet()) {
 
@@ -140,17 +124,12 @@ public class InsnAnalysis {
                         result.add(sourceInfo);
                         count++;
                         isRecord = true;
-                        if (count < depth || depth == -1) {
-                            findSource(source, sinkRule, depth, ruls);
+                        if (count < ruls.getDepth()) {
+                            findSource(source, sinkRule, ruls);
                         }
                         if ( isRecord ) {
-                            SinkResult s;
-                            if (sinkRule.getSinkName() == null) {
-                                s = new SinkResult(count, "CUSTOM",
-                                        "CUSTOM", (ArrayList<String>) result.clone());
-                            } else {
-                                s = new SinkResult(count, sinkRule.getSinkName(), sinkRule.getSeverityLevel(), (ArrayList<String>) result.clone());
-                            }
+                            SinkResult s = new SinkResult(count, sinkRule.getSinkName(), sinkRule.getSeverityLevel(),
+                                    (ArrayList<String>) result.clone());
                             finalResult.add(s);
                             logger.debug("\n" + s.invokeLength + " - " + s.sinkCata + " - " + s.sinkLevel + " - " + s.getInvokeDetail().get(0) + "\n" + s.toString(true));
                         }

@@ -1,5 +1,6 @@
 package com.mediocrity;
 
+import com.mediocrity.entity.SinkRule;
 import com.mediocrity.service.InsnAnalysis;
 import com.mediocrity.entity.Rules;
 import com.mediocrity.entity.SinkResult;
@@ -26,20 +27,24 @@ import java.util.Date;
 public class SinkFinder {
     private static final Logger logger = LoggerFactory.getLogger(SinkFinder.class);
 
-    public static String SINK_RULE_FIlE = "rules.json";
+    private static String SINK_RULE_FIlE = "rules.json";
 
-    public static String LOG_FILE = "vulns.log";
+    private static Rules ruls;
 
-    public static String TARGET_PATH = ".";
+    private static String LOG_FILE = "vulns.log";
 
-    public static int RECURSION_DEPTH = 1;
+    private static String TARGET_PATH = ".";
+    private static int RECURSION_DEPTH = 0;
+    private static String CUSTOM_SINK_RULE = "";
+    private static String SINK_BLOCK_RULE = "";
+    private static String CUSTOM_CLASS_INCLUSIONS = "";
+    private static String CUSTOM_JAR_EXCLUSIONS = "";
+    private static String CUSTOM_JAR_INCLUSIONS = "";
 
-    public static String CUSTOM_SINK_RULE = "";
-
-    public static String DATABASE_ADDR = "";
-    public static String DATABASE_NAME = "";
-    public static String DATABASE_USER = "";
-    public static String DATABASE_PASS = "";
+    private static String DATABASE_ADDR = "";
+    private static String DATABASE_NAME = "";
+    private static String DATABASE_USER = "";
+    private static String DATABASE_PASS = "";
 
     public static void main(String[] args) {
 
@@ -48,19 +53,19 @@ public class SinkFinder {
         SinkFinder sinkFinder = new SinkFinder();
         sinkFinder.defaultParser(args);
 
-        logger.info("SinkFinder 启动 ...");
-
         File target_file = new File(TARGET_PATH);
 
-        Rules ruls = (Rules) FileUtil.getJsonContent(SINK_RULE_FIlE, Rules.class);
+        ruls = (Rules) FileUtil.getJsonContent(SINK_RULE_FIlE, Rules.class);
+
+        sinkFinder.customRule();
+
+        logger.info(ruls.toString());
+
+        logger.info("SinkFinder 启动 ...");
 
         readFile(target_file, ruls);
 
-        if (!CUSTOM_SINK_RULE.isEmpty()) {
-            results = InsnAnalysis.runSink(ruls, CUSTOM_SINK_RULE, RECURSION_DEPTH);
-        } else {
-            results = InsnAnalysis.run(ruls, RECURSION_DEPTH);
-        }
+        results = InsnAnalysis.run(ruls);
 
         ArrayList<SinkResult> sortResults = new ArrayList<>(results);
         Collections.sort(sortResults, new Comparator<SinkResult>() {
@@ -76,6 +81,8 @@ public class SinkFinder {
 //        //数据库存储
 //        if (!DATABASE_ADDR.isEmpty())
 //            sinkFinder.databaseStore(results);
+
+//        ruls.getSinkRules().size()
 
         logger.info("任务完成！");
     }
@@ -235,11 +242,29 @@ public class SinkFinder {
                 .desc("指定 sink JSON 规则路径，默认为 resource/rules.json").build();
         options.addOption(rule);
 
-        Option target = Option.builder("s").longOpt("sink")
+        Option sink = Option.builder("s").longOpt("sink")
                 .hasArg()
                 .required(false)
                 .desc("自定义 sink 规则").build();
-        options.addOption(target);
+        options.addOption(sink);
+
+        Option targetBlock = Option.builder("bn").longOpt("sink_block")
+                .hasArg()
+                .required(false)
+                .desc("禁用的 sink 规则名称").build();
+        options.addOption(targetBlock);
+
+        Option classWhiteList = Option.builder("ci").longOpt("class_inclusions")
+                .hasArg()
+                .required(false)
+                .desc("自定义 class_inclusions 规则").build();
+        options.addOption(classWhiteList);
+
+        Option jarWhiteList = Option.builder("ji").longOpt("jar_inclusions")
+                .hasArg()
+                .required(false)
+                .desc("自定义 jar_inclusions 规则").build();
+        options.addOption(jarWhiteList);
 
         Option depth = Option.builder("d").longOpt("depth")
                 .hasArg()
@@ -311,8 +336,23 @@ public class SinkFinder {
             if (cmd.hasOption("s"))
                 CUSTOM_SINK_RULE = cmd.getOptionValue("sink");
 
-            if (cmd.hasOption("d"))
+            if (cmd.hasOption("bn"))
+                SINK_BLOCK_RULE = cmd.getOptionValue("sink_block");
+
+            if (cmd.hasOption("ci"))
+                CUSTOM_CLASS_INCLUSIONS = cmd.getOptionValue("class_inclusions");
+
+            if (cmd.hasOption("ji"))
+                CUSTOM_JAR_INCLUSIONS = cmd.getOptionValue("jar_inclusions");
+
+            if (cmd.hasOption("d")) {
                 RECURSION_DEPTH = Integer.parseInt(cmd.getOptionValue("depth"));
+                if (RECURSION_DEPTH < 20) {
+                    log.info("递归查找深度: " + RECURSION_DEPTH);
+                } else {
+                    log.error("递归查找深度: " + RECURSION_DEPTH + " ，递归深度过高建议重新指定！");
+                }
+            }
 
             if (cmd.hasOption("da"))
                 DATABASE_ADDR = cmd.getOptionValue("DB_Addr");
@@ -334,16 +374,54 @@ public class SinkFinder {
 
         log.info("目标分析路径: " + TARGET_PATH);
 
-        if (RECURSION_DEPTH < 20) {
-//            log.info("recursion sink rule: " + RECURSION_SINK_RULE);
-            log.info("递归查找深度: " + RECURSION_DEPTH);
-        } else {
-            log.error("递归查找深度: " + RECURSION_DEPTH + " ，递归深度过高建议重新指定！");
-        }
-
         if (CUSTOM_SINK_RULE.length() > 0) {
 //            log.info("recursion sink rule: " + RECURSION_SINK_RULE);
             log.info("自定义sink规则: " + CUSTOM_SINK_RULE);
+        }
+
+    }
+
+    private void customRule(){
+        if (!CUSTOM_SINK_RULE.isEmpty()) {
+            String[] cusSinkRule = CUSTOM_SINK_RULE.split(",");
+            ruls.getSinkRules().clear();
+            SinkRule sinkRule = new SinkRule("CUSTOM","CUSTOM", new ArrayList<>());
+            for (int i=0; i<cusSinkRule.length; i++){
+                sinkRule.getSinks().add(cusSinkRule[i]);
+            }
+            ruls.getSinkRules().add(sinkRule);
+        }
+
+        if (RECURSION_DEPTH != 0){
+            ruls.setDepth(RECURSION_DEPTH);
+        }
+
+        if (!SINK_BLOCK_RULE.isEmpty()) {
+            String[] cusSinkBlockRule = SINK_BLOCK_RULE.split(",");
+            for ( int i=0; i<cusSinkBlockRule.length; i++ ){
+                for (int j=0; j<ruls.getSinkRules().size();j++){
+                    if (ruls.getSinkRules().get(j).getSinkName().equals(cusSinkBlockRule[i])) {
+                        ruls.getSinkRules().get(j).getSinks().clear();
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!CUSTOM_CLASS_INCLUSIONS.isEmpty()){
+            String[] cusClassInclusions = CUSTOM_CLASS_INCLUSIONS.split(",");
+            ruls.getClassInclusions().clear();
+            for (int i=0; i<cusClassInclusions.length; i++){
+                ruls.getClassInclusions().add(cusClassInclusions[i]);
+            }
+        }
+
+        if (!CUSTOM_JAR_INCLUSIONS.isEmpty()){
+            String[] cusJarInclusions = CUSTOM_JAR_INCLUSIONS.split(",");
+            ruls.getJarNameInclusions().clear();
+            for (int i=0; i<cusJarInclusions.length; i++){
+                ruls.getJarNameInclusions().add(cusJarInclusions[i]);
+            }
         }
 
     }
