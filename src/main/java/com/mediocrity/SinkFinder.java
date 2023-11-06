@@ -36,7 +36,7 @@ public class SinkFinder {
     private static String TARGET_PATH = ".";
     private static int RECURSION_DEPTH = 0;
     private static String CUSTOM_SINK_RULE = "";
-    private static String SINK_BLOCK_RULE = "";
+    private static String CUSTOM_SINK_CATEGORY_BLOCK_RULE = "";
     private static String CUSTOM_CLASS_INCLUSIONS = "";
     private static String CUSTOM_JAR_EXCLUSIONS = "";
     private static String CUSTOM_JAR_INCLUSIONS = "";
@@ -223,82 +223,43 @@ public class SinkFinder {
                 " / __|| || '_ \\ | |/ /|  _|| || '_ \\  / _` | / _ \\| '__|\n" +
                 " \\__ \\| || | | ||   < | |  | || | | || (_| ||  __/| |   \n" +
                 " |___/|_||_| |_||_|\\_\\|_|  |_||_| |_| \\__,_| \\___||_|   \n" +
-                "                                             0.1@mediocrity\n" +
+                "                                             0.1@medi0cr1ty\n" +
                 "                                                        ";
         System.out.println(banner);
 
         Options options = new Options();
 
-        Option path = Option.builder("p").longOpt("path")
-                .hasArg()
-                .required(false)
-                .desc("指定目标分析路径").build();
+        Option path = Option.builder("p").longOpt("path").hasArg().required(false).desc("指定目标分析路径").build();
         options.addOption(path);
 
-        Option rule = Option.builder("r").longOpt("rule")
-                .argName("rules.json")
-                .hasArg()
-                .required(false)
-                .desc("指定 sink JSON 规则路径，默认为 resource/rules.json").build();
+        Option rule = Option.builder("r").longOpt("rule").argName("rules.json").hasArg().required(false).desc("指定 sink JSON 规则路径，默认为 resource/rules.json").build();
         options.addOption(rule);
 
-        Option sink = Option.builder("s").longOpt("sink")
-                .hasArg()
-                .required(false)
-                .desc("自定义 sink 规则").build();
+        Option sink = Option.builder("s").longOpt("sink").hasArg().required(false).desc("自定义 sink 规则").build();
         options.addOption(sink);
 
-        Option targetBlock = Option.builder("bn").longOpt("sink_block")
-                .hasArg()
-                .required(false)
-                .desc("禁用的 sink 规则名称").build();
+        Option targetBlock = Option.builder("scb").longOpt("sink_category_block").hasArg().required(false).desc("自定义禁用的 sink 规则类别").build();
         options.addOption(targetBlock);
 
-        Option classWhiteList = Option.builder("ci").longOpt("class_inclusions")
-                .hasArg()
-                .required(false)
-                .desc("自定义 class_inclusions 规则").build();
+        Option classWhiteList = Option.builder("ci").longOpt("class_inclusions").hasArg().required(false).desc("自定义 class_inclusions 规则").build();
         options.addOption(classWhiteList);
 
-        Option jarWhiteList = Option.builder("ji").longOpt("jar_inclusions")
-                .hasArg()
-                .required(false)
-                .desc("自定义 jar_inclusions 规则").build();
+        Option jarWhiteList = Option.builder("ji").longOpt("jar_inclusions").hasArg().required(false).desc("自定义 jar_inclusions 规则").build();
         options.addOption(jarWhiteList);
 
-        Option depth = Option.builder("d").longOpt("depth")
-                .hasArg()
-                .argName("3")
-                .required(false)
-                .desc("指定递归查找深度").build();
+        Option depth = Option.builder("d").longOpt("depth").hasArg().argName("3").required(false).desc("指定递归查找深度").build();
         options.addOption(depth);
 
-        Option DB_Addr = Option.builder("da").longOpt("DB_Addr")
-                .argName("127.0.0.1")
-                .hasArg()
-                .required(false)
-                .desc("数据库地址").build();
+        Option DB_Addr = Option.builder("da").longOpt("DB_Addr").argName("127.0.0.1").hasArg().required(false).desc("数据库地址").build();
         options.addOption(DB_Addr);
 
-        Option DB_Name = Option.builder("dn").longOpt("DB_Name")
-                .argName("demo")
-                .hasArg()
-                .required(false)
-                .desc("数据库名").build();
+        Option DB_Name = Option.builder("dn").longOpt("DB_Name").argName("demo").hasArg().required(false).desc("数据库名").build();
         options.addOption(DB_Name);
 
-        Option DB_User = Option.builder("du").longOpt("DB_User")
-                .argName("root")
-                .hasArg()
-                .required(false)
-                .desc("数据库用户名").build();
+        Option DB_User = Option.builder("du").longOpt("DB_User").argName("root").hasArg().required(false).desc("数据库用户名").build();
         options.addOption(DB_User);
 
-        Option DB_PassWD = Option.builder("dp").longOpt("DB_PassWD")
-                .argName("root")
-                .hasArg()
-                .required(false)
-                .desc("数据库密码").build();
+        Option DB_PassWD = Option.builder("dp").longOpt("DB_PassWD").argName("root").hasArg().required(false).desc("数据库密码").build();
         options.addOption(DB_PassWD);
 
         CommandLine cmd;
@@ -333,17 +294,25 @@ public class SinkFinder {
                 log.info("规则路径：" + new File(SINK_RULE_FIlE).getAbsolutePath());
             }
 
-            if (cmd.hasOption("s"))
+            if (cmd.hasOption("s")) {
                 CUSTOM_SINK_RULE = cmd.getOptionValue("sink");
+                log.info("自定义sink规则: " + CUSTOM_SINK_RULE);
+            }
 
-            if (cmd.hasOption("bn"))
-                SINK_BLOCK_RULE = cmd.getOptionValue("sink_block");
+            if (cmd.hasOption("scb")){
+                CUSTOM_SINK_CATEGORY_BLOCK_RULE = cmd.getOptionValue("sink_category_block");
+                log.info("自定义禁用的 sink 规则类别: " + CUSTOM_SINK_CATEGORY_BLOCK_RULE);
+            }
 
-            if (cmd.hasOption("ci"))
+            if (cmd.hasOption("ci")){
                 CUSTOM_CLASS_INCLUSIONS = cmd.getOptionValue("class_inclusions");
+                log.info("自定义 class_inclusions 规则: " + CUSTOM_CLASS_INCLUSIONS);
+            }
 
-            if (cmd.hasOption("ji"))
+            if (cmd.hasOption("ji")) {
                 CUSTOM_JAR_INCLUSIONS = cmd.getOptionValue("jar_inclusions");
+                log.info("自定义 jar_inclusions 规则: " + CUSTOM_CLASS_INCLUSIONS);
+            }
 
             if (cmd.hasOption("d")) {
                 RECURSION_DEPTH = Integer.parseInt(cmd.getOptionValue("depth"));
@@ -374,20 +343,16 @@ public class SinkFinder {
 
         log.info("目标分析路径: " + TARGET_PATH);
 
-        if (CUSTOM_SINK_RULE.length() > 0) {
-//            log.info("recursion sink rule: " + RECURSION_SINK_RULE);
-            log.info("自定义sink规则: " + CUSTOM_SINK_RULE);
-        }
 
     }
 
     private void customRule(){
         if (!CUSTOM_SINK_RULE.isEmpty()) {
-            String[] cusSinkRule = CUSTOM_SINK_RULE.split(",");
+            String[] cusSinkRules = CUSTOM_SINK_RULE.split(",");
             ruls.getSinkRules().clear();
             SinkRule sinkRule = new SinkRule("CUSTOM","CUSTOM", new ArrayList<>());
-            for (int i=0; i<cusSinkRule.length; i++){
-                sinkRule.getSinks().add(cusSinkRule[i]);
+            for (int i=0; i<cusSinkRules.length; i++){
+                sinkRule.getSinks().add(cusSinkRules[i]);
             }
             ruls.getSinkRules().add(sinkRule);
         }
@@ -396,11 +361,11 @@ public class SinkFinder {
             ruls.setDepth(RECURSION_DEPTH);
         }
 
-        if (!SINK_BLOCK_RULE.isEmpty()) {
-            String[] cusSinkBlockRule = SINK_BLOCK_RULE.split(",");
-            for ( int i=0; i<cusSinkBlockRule.length; i++ ){
-                for (int j=0; j<ruls.getSinkRules().size();j++){
-                    if (ruls.getSinkRules().get(j).getSinkName().equals(cusSinkBlockRule[i])) {
+        if (!CUSTOM_SINK_CATEGORY_BLOCK_RULE.isEmpty()) {
+            String[] cusSinkBlockRules = CUSTOM_SINK_CATEGORY_BLOCK_RULE.split(",");
+            for ( int i=0; i<cusSinkBlockRules.length; i++ ){
+                for (int j=0; j<ruls.getSinkRules().size(); j++){
+                    if (ruls.getSinkRules().get(j).getSinkName().equals(cusSinkBlockRules[i])) {
                         ruls.getSinkRules().get(j).getSinks().clear();
                         break;
                     }

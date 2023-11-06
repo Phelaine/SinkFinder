@@ -1,8 +1,8 @@
 {
   "depth": 4,
-  "path_exclusions": ["AndroidSDK",".idea","resources",".git","META-INF"],
-  "jar_name_inclusions": ["*","weblogic","coherence"],
-  "jar_name_exclusions": ["sinkfinder-2","spring-boot","logback","lombok","META-INF","log4j","slf4j",
+  "path_exclusions": ["AndroidSDK",".idea","resources","META-INF"],
+  "jar_name_inclusions": ["*"],
+  "jar_name_exclusions": ["spring-boot","logback","lombok","META-INF","log4j","slf4j",
     "spring-context","tomcat-embed-core","spring-web","mysql-connector-java","antlr-"],
   "class_inclusions": ["*"],
   "class_exclusions": ["logback","lombok","org.springframework.boot.loader"],
