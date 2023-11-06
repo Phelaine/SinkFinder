@@ -23,7 +23,7 @@ jobs:
       run: mvn -B package --file pom.xml
     - name: Get current date
       run: |
-        echo "RELEASE_DATE=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_ENV
+        timedatectl set-timezone Asia/Shanghai&&echo "RELEASE_DATE=$(date +'%Y-%m-%d %H:%M')" >> $GITHUB_ENV
     - name: Move jar
       run: |
         mkdir build && cp target/*.jar build
