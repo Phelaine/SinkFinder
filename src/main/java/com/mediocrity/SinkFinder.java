@@ -33,7 +33,7 @@ public class SinkFinder {
 
     private static String LOG_FILE = "vulns.log";
 
-    private static String TARGET_PATH = ".";
+    public static String TARGET_PATH = ".";
     private static int RECURSION_DEPTH = 0;
     private static String CUSTOM_SINK_RULE = "";
     private static String CUSTOM_SINK_CATEGORY_BLOCK_RULE = "";
@@ -118,6 +118,8 @@ public class SinkFinder {
 
         File log = new File("logs" + File.separator + LOG_FILE);
         if (log.exists())log.delete();
+
+        this.sinkLog("${TARGET} : " + SinkFinder.TARGET_PATH + "\n");
 
         int count = 0;
         for (SinkResult sinkResult : sortResults){
@@ -272,6 +274,9 @@ public class SinkFinder {
             } else {
                 TARGET_PATH = ".";
             }
+
+            File f = new File(TARGET_PATH);
+            TARGET_PATH = f.getCanonicalPath();
 
             if (cmd.hasOption("r")) {
                 SINK_RULE_FIlE = cmd.getOptionValue("rule");

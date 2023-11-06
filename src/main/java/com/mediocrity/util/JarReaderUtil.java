@@ -1,5 +1,6 @@
 package com.mediocrity.util;
 
+import com.mediocrity.SinkFinder;
 import com.mediocrity.entity.Rules;
 import com.mediocrity.model.ClassInfo;
 import com.mediocrity.model.ClassRepo;
@@ -145,6 +146,7 @@ public class JarReaderUtil {
             if (jarName.indexOf("@") > 0){
                 jarName = jarName.replaceAll("@\\d+", "@");
             }
+            jarName = jarName.replaceAll(SinkFinder.TARGET_PATH,"\\${TARGET}");
 
             final ClassInfo classInfo = new ClassInfo(node, jarName);
             ClassRepo.classes.put(node.name.replaceAll("/","\\."), classInfo);
