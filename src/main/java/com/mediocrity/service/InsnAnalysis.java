@@ -102,7 +102,7 @@ public class InsnAnalysis {
                     sinkClass = sink.split(":")[0];
                     sinkMethodDesc = sink.split(":")[1];
 
-                    if (count == 0) {
+                    if (sink.split("\\(").length == 1) {
                         if (!sinkMethodDesc.equals(insnMethodName)) continue;
                     } else {
                         if (!sinkMethodDesc.equals(insnMethodName + insnMethodDesc)) continue;

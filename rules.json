@@ -1,6 +1,6 @@
 {
   "path_exclusions": ["AndroidSDK",".idea","resources",".git","META-INF"],
-  "jar_name_inclusions": ["chat","hutool"],
+  "jar_name_inclusions": ["*","weblogic","coherence"],
   "jar_name_exclusions": ["sinkfinder-2","spring-boot","logback","lombok","META-INF","log4j","slf4j",
     "spring-context","tomcat-embed-core","spring-web","mysql-connector-java","antlr-"],
   "class_inclusions": ["*"],
@@ -9,36 +9,36 @@
     {
       "sink_name": "RCE",
       "severity_level": "High",
-      "sinks": ["java.lang.Runtime:exec","java.lang.ProcessBuilder:<init>","java.lang.ProcessBuilder:start","javax.script.ScriptEngine:eval"]
-    },{
+      "sinks": ["java.lang.Runtime:exec","java.lang.ProcessBuilder:<init>","java.lang.ProcessBuilder:start","javax.script.ScriptEngine:eval","javax.swing.plaf.synth.SynthLookAndFeel:load"]
+    }, {
       "sink_name": "UNSERIALIZE",
       "severity_level": "High",
       "sinks": ["java.io.ObjectInputStream:readObject","java.io.ObjectInputStream:readUnshared","org.yaml.snakeyaml.Yaml:load","com.thoughtworks.xstream.XStream:fromXML","org.apache.xmlrpc.parser.XmlRpcRequestParser:startElement","java.beans.XMLDecoder:readObject","org.apache.xml.security.transforms.Transforms:performTransforms"]
-    },{
+    }, {
       "sink_name": "JNDI",
       "severity_level": "High",
       "sinks": ["javax.naming.InitialContext:doLookup","javax.naming.InitialContext:lookup"]
-    },{
+    }, {
       "sink_name": "SSTI",
       "severity_level": "High",
       "sinks": ["org.apache.velocity.app.Velocity:evaluate"]
-    },{
+    }, {
       "sink_name": "SPEL",
       "severity_level": "High",
       "sinks": ["org.springframework.expression.spel.standard.SpelExpression:getValue"]
-    },{
+    }, {
       "sink_name": "JDBC",
       "severity_level": "High",
       "sinks": ["com.mysql.cj.jdbc.result.ResultSetImpl:getObject", "java.sql.DriverManager:getConnection","java.sql.Driver:connect"]
-    },{
+    }, {
       "sink_name": "ZIPSLIP",
       "severity_level": "High",
       "sinks": ["java.util.zip.ZipInputStream:close"]
-    },{
+    }, {
       "sink_name": "Fastjson",
       "severity_level": "Medium",
       "sinks": ["com.alibaba.fastjson.JSON:parseObject","com.alibaba.fastjson.JSON:parse"]
-    },{
+    }, {
       "sink_name": "XXE",
       "severity_level": "Medium",
       "sinks": ["javax.xml.parsers.DocumentBuilder:parse","javax.xml.parsers.SAXParser:parse", "com.sun.org.apache.xerces.internal.parsers.DOMParser:parse","org.dom4j.io.SAXReader:read","org.xml.sax.XMLReader:parse","org.jdom2.input.SAXBuilder:build","org.apache.commons.digester3.Digester:parse","org.dom4j.DocumentHelper:parseText","org.apache.poi.xssf.usermodel.XSSFWorkbook:<init>"]
