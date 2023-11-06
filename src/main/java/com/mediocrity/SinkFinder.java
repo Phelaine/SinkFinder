@@ -6,6 +6,7 @@ import com.mediocrity.entity.SinkResult;
 import com.mediocrity.util.FileUtil;
 import com.mediocrity.util.JarReaderUtil;
 import com.mediocrity.util.RuleUtil;
+import com.mediocrity.util.TextTable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -42,26 +43,13 @@ public class SinkFinder {
     public static String DATABASE_PASS = "";
 
     public static void main(String[] args) {
-        String format = "|%1$-5s|%2$-10s|%3$-6s|%4$-1s|";
+        java.util.Date day = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
         HashSet<SinkResult> results;
 
         SinkFinder sinkFinder = new SinkFinder();
         sinkFinder.defaultParser(args);
-
-        java.util.Date day = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-        if (CUSTOM_SINK_RULE.length()==0){
-            LOG_FILE =
-                    "vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_").replaceAll("\\\\", "_").replaceAll("/", "_").replaceAll(":","") +
-                            ".log";
-        }else{
-            LOG_FILE = "vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
-                    ".log";
-        }
-
-        File log = new File("logs" + File.separator + LOG_FILE);
-        if (log.exists())log.delete();
 
         logger.info("SinkFinder 启动 ...");
 
@@ -85,10 +73,32 @@ public class SinkFinder {
             }
         });
 
+        if (CUSTOM_SINK_RULE.length() == 0) LOG_FILE = "vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.",
+                "_").replaceAll("\\\\", "_").replaceAll("/", "_").replaceAll(":","") +
+                            ".log";
+        else LOG_FILE = "vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
+                    ".log";
+
+        File log = new File("logs" + File.separator + LOG_FILE);
+        if (log.exists())log.delete();
+
         //文件记录
-        for (SinkResult sinkResult : sortResults)
-            sinkFinder.sinkLog(String.format(format, sinkResult.invokeLength, sinkResult.sinkCata, sinkResult.sinkLevel,
-                    String.join("\t", sinkResult.invokeDetail)));
+        int count = 0;
+        for (SinkResult sinkResult : sortResults){
+            count++;
+            sinkFinder.sinkLog(count + " - " + sinkResult.sinkCata + " - " +
+                    sinkResult.sinkLevel + " - " + sinkResult.getInvokeDetail().get(0));
+            String[] header = {"Count", "Class & Method", "Method Signature", "Jar/Class"};
+            String[][] rows = new String[sinkResult.getInvokeLength()][4];
+            for (int i = 0; i < sinkResult.getInvokeLength(); i++) {
+                String vul = sinkResult.getInvokeDetail().get(i+1);
+                rows[i][0] = String.valueOf(i+1);
+                rows[i][1] = vul.substring(vul.indexOf('#') + 1, vul.indexOf('('));
+                rows[i][2] = vul.substring(vul.indexOf('('));
+                rows[i][3] = vul.substring(0, vul.indexOf('#'));
+            }
+            sinkFinder.sinkLog(new TextTable(header, rows).toString());
+        }
 
 //        //数据库存储
 //        if (!DATABASE_ADDR.isEmpty())
@@ -257,14 +267,13 @@ public class SinkFinder {
     }
 
     public void sinkLog(String msg) {
-        logger.info(msg);
+//        logger.info(msg);
 
         try {
             File d = new File("logs");
             d.mkdir();
         } catch (Exception e) {
         }
-
 
         try {
             File file = new File("logs" + File.separator + LOG_FILE);

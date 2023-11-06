@@ -44,7 +44,7 @@ public class JarReaderUtil {
 
         if ((jar.getName().endsWith(".class") || jar.getName().endsWith(".class/")) && !RuleUtil.isExcluded(jar.getName().replaceAll("/", "\\."), ruls.getClassExclusions())) {
             try (final InputStream fis = new FileInputStream(jar)) {
-                streamToNode(fis, jar.getName());
+                streamToNode(fis, jar.getPath());
                 return;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -63,7 +63,7 @@ public class JarReaderUtil {
                         if (RuleUtil.isExcluded(itemName.replaceAll("/", "\\."), ruls.getClassExclusions())) {
                             continue;
                         }
-                        streamToNode(jis, jar.getName());
+                        streamToNode(jis, jar.getPath());
                     }
                     if (itemName.endsWith(".jar")) {
                         readJar(jar.getName().substring(0, jar.getName().lastIndexOf(".")), jis, ruls);
@@ -83,7 +83,7 @@ public class JarReaderUtil {
                                     continue;
                                 }
                                 try (final InputStream zis = zf.getInputStream(entry)) {
-                                    streamToNode(zis, jar.getName());
+                                    streamToNode(zis, jar.getPath());
                                 }
                             }
                         }

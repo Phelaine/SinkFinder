@@ -165,12 +165,16 @@ public class InsnAnalysis {
 
     public static void findSubClasses(String superName){
         for (Map.Entry<String, ClassInfo> classInfoEntry: ClassRepo.classes.entrySet()){
-            String s = classInfoEntry.getValue().getClassNode().superName.replaceAll("/", "\\.");
-            if (s.equals("java.lang.Object")) return;
-            else if (s.contains(superName)){
-                subClasses.add(classInfoEntry.getKey());
-                findSubClasses(classInfoEntry.getKey());
-                break;
+            try {
+                String s = classInfoEntry.getValue().getClassNode().superName.replaceAll("/", "\\.");
+                if (s.equals("java.lang.Object")) return;
+                else if (s.contains(superName)){
+                    subClasses.add(classInfoEntry.getKey());
+                    findSubClasses(classInfoEntry.getKey());
+                    break;
+                }
+            }catch (Exception e){
+                System.out.println(e.getMessage());
             }
         }
     }
