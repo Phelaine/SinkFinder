@@ -106,7 +106,7 @@ public class SinkFinder {
         }
     }
 
-    private void fileStore(ArrayList<SinkResult> sortResults){
+    private void fileStore(ArrayList<SinkResult> sortResults) {
         java.util.Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -119,7 +119,11 @@ public class SinkFinder {
         File log = new File("logs" + File.separator + LOG_FILE);
         if (log.exists())log.delete();
 
-        this.sinkLog("${TARGET} : " + SinkFinder.TARGET_PATH + "\n");
+        try {
+            this.sinkLog(ruls.toString() + "\n${PATH} 绝对路径：" + new File(TARGET_PATH).getCanonicalPath() + "\n");
+        }catch (Exception e){
+            logger.error(e.getMessage());
+        }
 
         int count = 0;
         for (SinkResult sinkResult : sortResults){
@@ -252,6 +256,9 @@ public class SinkFinder {
         Option depth = Option.builder("d").longOpt("depth").hasArg().argName("3").required(false).desc("指定递归查找深度").build();
         options.addOption(depth);
 
+        Option help = Option.builder("h").longOpt("help").required(false).desc("帮助").build();
+        options.addOption(help);
+
         Option DB_Addr = Option.builder("da").longOpt("DB_Addr").argName("127.0.0.1").hasArg().required(false).desc("数据库地址").build();
         options.addOption(DB_Addr);
 
@@ -269,14 +276,16 @@ public class SinkFinder {
         try {
             cmd = new DefaultParser().parse(options, args);
 
+            if (cmd.hasOption("h")) {
+                helper.printHelp("SinkFinder", options);
+                System.exit(0);
+            }
+
             if (cmd.hasOption("p")) {
                 TARGET_PATH = cmd.getOptionValue("path");
             } else {
                 TARGET_PATH = ".";
             }
-
-            File f = new File(TARGET_PATH);
-            TARGET_PATH = f.getCanonicalPath();
 
             if (cmd.hasOption("r")) {
                 SINK_RULE_FIlE = cmd.getOptionValue("rule");

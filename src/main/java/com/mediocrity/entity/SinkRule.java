@@ -23,4 +23,8 @@ public class SinkRule {
         this.sinks = sinks;
     }
 
+    public String toString(){
+        return sinkName + " - " + severityLevel + " : " + sinks;
+    }
+
 }

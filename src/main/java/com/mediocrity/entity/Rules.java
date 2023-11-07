@@ -20,6 +20,6 @@ public class Rules {
     private ArrayList<SinkRule> sinkRules;
 
     public String toString(){
-        return "遍历深度为：" + depth + "  路径黑名单：" + pathExclusions + "  jar包白名单：" + jarNameInclusions + "  jar包黑名单：" + jarNameExclusions + "  class白名单：" + classInclusions + "  class黑名单：" + classExclusions + "  sink规则条数：" + sinkRules.size();
+        return "递归查找深度：" + depth + " \npath黑名单：" + pathExclusions + " \njar包白名单：" + jarNameInclusions + " \njar包黑名单：" + jarNameExclusions + " \nclass白名单：" + classInclusions + " \nclass黑名单：" + classExclusions + " \nsink规则：" + sinkRules.toString();
     }
 }

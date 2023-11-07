@@ -107,7 +107,7 @@ public class InsnAnalysis {
                                     else ClassRepo.classes.get(sinkClass).setSubClasses((ArrayList<String>) subClasses.clone());
                                 }
 
-                                if (info.getSubClasses().contains(sinkClass)) isFind = true;
+                                if (info.getSubClasses().contains(insnMethodOwner.replaceAll("/", "\\."))) isFind = true;
                             }
 
                             if ( !isFind ){
@@ -145,12 +145,11 @@ public class InsnAnalysis {
     public static void findSubClasses(String superName){
         for (Map.Entry<String, ClassInfo> classInfoEntry: ClassRepo.classes.entrySet()){
             try {
-                String s = classInfoEntry.getValue().getClassNode().superName.replaceAll("/", "\\.");
-                if (s.equals("java.lang.Object")) return;
+                String s = classInfoEntry.getValue().getClassNode().superName.replaceAll("/","\\.");
+                if (s.equals("java.lang.Object")) continue;
                 else if (s.contains(superName)){
                     subClasses.add(classInfoEntry.getKey());
                     findSubClasses(classInfoEntry.getKey());
-                    break;
                 }
             }catch (Exception e){
                 System.out.println(e.getMessage());

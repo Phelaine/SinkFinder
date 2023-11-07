@@ -146,7 +146,7 @@ public class JarReaderUtil {
             if (jarName.indexOf("@") > 0){
                 jarName = jarName.replaceAll("@\\d+", "@");
             }
-            jarName = jarName.replaceAll(SinkFinder.TARGET_PATH,"\\${TARGET}");
+            jarName = jarName.replace(SinkFinder.TARGET_PATH,"${PATH}");
 
             final ClassInfo classInfo = new ClassInfo(node, jarName);
             ClassRepo.classes.put(node.name.replaceAll("/","\\."), classInfo);
