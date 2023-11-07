@@ -43,7 +43,7 @@ public class JarReaderUtil {
             return;
         }
 
-        if ((jar.getName().endsWith(".class") || jar.getName().endsWith(".class/")) && !RuleUtil.isExcluded(jar.getName().replaceAll("/", "\\."), ruls.getClassExclusions())) {
+        if ((jar.getName().endsWith(".class") || jar.getName().endsWith(".class/")) && !RuleUtil.isExcluded(jar.getName().replace("/", "."), ruls.getClassExclusions())) {
             try (final InputStream fis = new FileInputStream(jar)) {
                 streamToNode(fis, jar.getPath());
                 return;
@@ -58,7 +58,7 @@ public class JarReaderUtil {
 
                 JarEntry jarEntry;
                 while ((jarEntry = jis.getNextJarEntry()) != null) {
-                    String itemName = jarEntry.getName().replaceAll("/", "\\.");
+                    String itemName = jarEntry.getName().replace("/", ".");
 
                     if (itemName.endsWith(".class") || itemName.endsWith(".class/")) {
                         if (RuleUtil.isExcluded(itemName, ruls.getClassExclusions()) || RuleUtil.isExcluded(itemName, ruls.getJarNameExclusions())) {
@@ -77,7 +77,7 @@ public class JarReaderUtil {
                         final Enumeration<? extends ZipEntry> entries = zf.entries();
                         while (entries.hasMoreElements()) {
                             final ZipEntry entry = entries.nextElement();
-                            final String itemName = entry.getName().replaceAll("/", "\\.");
+                            final String itemName = entry.getName().replace("/", ".");
 
                             if (itemName.endsWith(".class") || itemName.endsWith(".class/")) {
                                 if (RuleUtil.isExcluded(itemName, ruls.getClassExclusions())) {
@@ -149,7 +149,7 @@ public class JarReaderUtil {
             jarName = jarName.replace(SinkFinder.TARGET_PATH,"${PATH}");
 
             final ClassInfo classInfo = new ClassInfo(node, jarName);
-            ClassRepo.classes.put(node.name.replaceAll("/","\\."), classInfo);
+            ClassRepo.classes.put(node.name.replace("/","."), classInfo);
         } catch (IOException e) {
             e.printStackTrace();
         }

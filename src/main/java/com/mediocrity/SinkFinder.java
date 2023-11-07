@@ -68,7 +68,7 @@ public class SinkFinder {
         results = InsnAnalysis.run(ruls);
 
         ArrayList<SinkResult> sortResults = new ArrayList<>(results);
-        sortResults.sort((o1, o2) -> o2.invokeLength - o1.invokeLength);
+//        sortResults.sort((o1, o2) -> o2.invokeLength - o1.invokeLength);
 
         //文件记录
         sinkFinder.fileStore(sortResults);
@@ -104,11 +104,12 @@ public class SinkFinder {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         if (CUSTOM_SINK_RULE.length() == 0) {
-            LOG_FILE = "vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_").replaceAll("\\\\", "_").replaceAll("/", "_").replaceAll(":","") +
+            LOG_FILE = "vul_" + sdf.format(day) + "_" + TARGET_PATH.replace(".", "_").replace("\\", "_").replace(
+                    "/", "_").replace(":","") +
                 ".log";
         }
         else{
-            LOG_FILE = "vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
+            LOG_FILE = "vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replace(".","_") +
                 ".log";
         }
 
@@ -128,8 +129,10 @@ public class SinkFinder {
             }
 
             fileWriter.write("共找到 " + count + " 条路径 \n");
+            logger.info("共找到 " + count + " 条路径 \n");
             for (Map.Entry<String, Integer> entry : countMap.entrySet()) {
                 fileWriter.write(entry.getKey() + " 类别存在：" + entry.getValue() + " 条路径" + "\n");
+                logger.info(entry.getKey() + " 类别存在：" + entry.getValue() + " 条路径" + "\n");
             }
             fileWriter.flush();
             fileWriter.close();

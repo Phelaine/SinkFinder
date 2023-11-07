@@ -1,5 +1,5 @@
 {
-  "depth": 4,
+  "depth": 1,
   "path_exclusions": ["AndroidSDK",".idea","resources","META-INF"],
   "jar_name_inclusions": ["*"],
   "jar_name_exclusions": ["spring-boot","logback","lombok","META-INF","log4j","slf4j",
