@@ -77,10 +77,10 @@ public class JarReaderUtil {
                         final Enumeration<? extends ZipEntry> entries = zf.entries();
                         while (entries.hasMoreElements()) {
                             final ZipEntry entry = entries.nextElement();
-                            final String itemName = entry.getName();
+                            final String itemName = entry.getName().replaceAll("/", "\\.");
 
                             if (itemName.endsWith(".class") || itemName.endsWith(".class/")) {
-                                if (RuleUtil.isExcluded(itemName.replaceAll("/", "\\."), ruls.getClassExclusions())) {
+                                if (RuleUtil.isExcluded(itemName, ruls.getClassExclusions())) {
                                     continue;
                                 }
                                 try (final InputStream zis = zf.getInputStream(entry)) {
