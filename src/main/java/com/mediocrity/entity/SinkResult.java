@@ -49,6 +49,6 @@ public class SinkResult{
             else rows[i][2] = vul.substring(0, vul.indexOf('#'));
             if (!isPrint) rows[i][3] = vul.substring(0, vul.indexOf('#'));
         }
-        return new TextTable(header, rows).toString();
+        return sinkCata + " - " + sinkLevel + " - " + getInvokeDetail().get(0) + "\n" + new TextTable(header, rows);
     }
 }

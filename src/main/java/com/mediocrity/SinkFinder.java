@@ -38,7 +38,7 @@ public class SinkFinder {
     private static String CUSTOM_SINK_RULE = "";
     private static String CUSTOM_SINK_CATEGORY_BLOCK_RULE = "";
     private static String CUSTOM_CLASS_INCLUSIONS = "";
-    private static String CUSTOM_JAR_EXCLUSIONS = "";
+//    private static String CUSTOM_JAR_EXCLUSIONS = "";
     private static String CUSTOM_JAR_INCLUSIONS = "";
 
     private static String DATABASE_ADDR = "";
@@ -77,8 +77,6 @@ public class SinkFinder {
 //        if (!DATABASE_ADDR.isEmpty())
 //            sinkFinder.databaseStore(results);
 
-//        ruls.getSinkRules().size()
-
         logger.info("任务完成！");
     }
 
@@ -105,49 +103,37 @@ public class SinkFinder {
         java.util.Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        if (CUSTOM_SINK_RULE.length() == 0) LOG_FILE = "vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.",
-                "_").replaceAll("\\\\", "_").replaceAll("/", "_").replaceAll(":","") +
+        if (CUSTOM_SINK_RULE.length() == 0) {
+            LOG_FILE = "vul_" + sdf.format(day) + "_" + TARGET_PATH.replaceAll("\\.", "_").replaceAll("\\\\", "_").replaceAll("/", "_").replaceAll(":","") +
                 ".log";
-        else LOG_FILE = "vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
+        }
+        else{
+            LOG_FILE = "vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replaceAll("\\.","_") +
                 ".log";
+        }
 
         File log = new File("logs" + File.separator + LOG_FILE);
-        if (log.exists())log.delete();
-
         try {
-            this.sinkLog(ruls.toString() + "\n${PATH} 绝对路径：" + TARGET_PATH + "\n");
-        }catch (Exception e){
-            logger.error(e.getMessage());
-        }
+            FileWriter fileWriter = new FileWriter(log, false);
+            fileWriter.write(ruls.toString() + "\n${PATH} 绝对路径：" + TARGET_PATH + "\n\n");
 
-        int count = 0;
-        for (SinkResult sinkResult : sortResults){
-            count++;
-            this.sinkLog(count + " - " + sinkResult.sinkCata + " - " +
-                    sinkResult.sinkLevel + " - " + sinkResult.getInvokeDetail().get(0));
+            HashMap<String, Integer> countMap = new HashMap<>();
+            int count = 0;
+            for (SinkResult sinkResult : sortResults) {
+                count++;
+                fileWriter.write(count + " - " + sinkResult.toString(false) + "\n");
 
-            this.sinkLog(sinkResult.toString(false));
-        }
-    }
+                countMap.put(sinkResult.getSinkCata(), countMap.getOrDefault(sinkResult.getSinkCata(), 0) + 1);
 
-    public void sinkLog(String msg) {
-//        logger.info(msg);
+            }
 
-        try {
-            File d = new File("logs");
-            d.mkdir();
-        } catch (Exception e) {
-        }
-
-        try {
-            File file = new File("logs" + File.separator + LOG_FILE);
-            FileWriter fileWriter = new FileWriter(file, true);
-            fileWriter.write(msg+"\n");
+            fileWriter.write("共找到 " + count + " 条路径 \n");
+            for (Map.Entry<String, Integer> entry : countMap.entrySet()) {
+                fileWriter.write(entry.getKey() + " 类别存在：" + entry.getValue() + " 条路径" + "\n");
+            }
             fileWriter.flush();
             fileWriter.close();
-        } catch (Exception e) {
-        }
-
+        }catch (Exception e){}
     }
 
 //    private void databaseStore(ArrayList<SinkResult> results){
@@ -321,7 +307,7 @@ public class SinkFinder {
 
             if (cmd.hasOption("ji")) {
                 CUSTOM_JAR_INCLUSIONS = cmd.getOptionValue("jar_inclusions");
-                log.info("自定义 jar_inclusions 规则: " + CUSTOM_CLASS_INCLUSIONS);
+                log.info("自定义 jar_inclusions 规则: " + CUSTOM_JAR_INCLUSIONS);
             }
 
             if (cmd.hasOption("d")) {

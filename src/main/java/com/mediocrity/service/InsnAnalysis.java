@@ -65,7 +65,6 @@ public class InsnAnalysis {
      * @param sink  目标调用规则
      * @param ruls  规则限制
      * @param sinkRule  sink规则信息
-     * @return
      */
     private static void findSource(String sink, SinkRule sinkRule, Rules ruls) {
 
@@ -129,7 +128,7 @@ public class InsnAnalysis {
                             SinkResult s = new SinkResult(count, sinkRule.getSinkName(), sinkRule.getSeverityLevel(),
                                     (ArrayList<String>) result.clone());
                             finalResult.add(s);
-                            logger.debug("\n" + s.invokeLength + " - " + s.sinkCata + " - " + s.sinkLevel + " - " + s.getInvokeDetail().get(0) + "\n" + s.toString(true));
+                            logger.debug("\n" + s.invokeLength + " - " + s.toString(true));
                         }
                         count--;
                         result.remove(result.size() - 1);
