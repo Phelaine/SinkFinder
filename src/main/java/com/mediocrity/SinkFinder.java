@@ -68,12 +68,7 @@ public class SinkFinder {
         results = InsnAnalysis.run(ruls);
 
         ArrayList<SinkResult> sortResults = new ArrayList<>(results);
-        Collections.sort(sortResults, new Comparator<SinkResult>() {
-            @Override
-            public int compare(SinkResult o1, SinkResult o2) {
-                return o2.invokeLength - o1.invokeLength;
-            }
-        });
+        sortResults.sort((o1, o2) -> o2.invokeLength - o1.invokeLength);
 
         //文件记录
         sinkFinder.fileStore(sortResults);
@@ -120,7 +115,7 @@ public class SinkFinder {
         if (log.exists())log.delete();
 
         try {
-            this.sinkLog(ruls.toString() + "\n${PATH} 绝对路径：" + new File(TARGET_PATH).getCanonicalPath() + "\n");
+            this.sinkLog(ruls.toString() + "\n${PATH} 绝对路径：" + TARGET_PATH + "\n");
         }catch (Exception e){
             logger.error(e.getMessage());
         }
@@ -286,6 +281,7 @@ public class SinkFinder {
             } else {
                 TARGET_PATH = ".";
             }
+            TARGET_PATH = new File(TARGET_PATH).getAbsolutePath();
 
             if (cmd.hasOption("r")) {
                 SINK_RULE_FIlE = cmd.getOptionValue("rule");
@@ -365,8 +361,8 @@ public class SinkFinder {
             String[] cusSinkRules = CUSTOM_SINK_RULE.split(",");
             ruls.getSinkRules().clear();
             SinkRule sinkRule = new SinkRule("CUSTOM","CUSTOM", new ArrayList<>());
-            for (int i=0; i<cusSinkRules.length; i++){
-                sinkRule.getSinks().add(cusSinkRules[i]);
+            for (String cusSinkRule : cusSinkRules) {
+                sinkRule.getSinks().add(cusSinkRule);
             }
             ruls.getSinkRules().add(sinkRule);
         }
@@ -377,9 +373,9 @@ public class SinkFinder {
 
         if (!CUSTOM_SINK_CATEGORY_BLOCK_RULE.isEmpty()) {
             String[] cusSinkBlockRules = CUSTOM_SINK_CATEGORY_BLOCK_RULE.split(",");
-            for ( int i=0; i<cusSinkBlockRules.length; i++ ){
-                for (int j=0; j<ruls.getSinkRules().size(); j++){
-                    if (ruls.getSinkRules().get(j).getSinkName().equals(cusSinkBlockRules[i])) {
+            for (String cusSinkBlockRule : cusSinkBlockRules) {
+                for (int j = 0; j < ruls.getSinkRules().size(); j++) {
+                    if (ruls.getSinkRules().get(j).getSinkName().equals(cusSinkBlockRule)) {
                         ruls.getSinkRules().get(j).getSinks().clear();
                         break;
                     }
@@ -390,16 +386,16 @@ public class SinkFinder {
         if (!CUSTOM_CLASS_INCLUSIONS.isEmpty()){
             String[] cusClassInclusions = CUSTOM_CLASS_INCLUSIONS.split(",");
             ruls.getClassInclusions().clear();
-            for (int i=0; i<cusClassInclusions.length; i++){
-                ruls.getClassInclusions().add(cusClassInclusions[i]);
+            for (String cusClassInclusion : cusClassInclusions) {
+                ruls.getClassInclusions().add(cusClassInclusion);
             }
         }
 
         if (!CUSTOM_JAR_INCLUSIONS.isEmpty()){
             String[] cusJarInclusions = CUSTOM_JAR_INCLUSIONS.split(",");
             ruls.getJarNameInclusions().clear();
-            for (int i=0; i<cusJarInclusions.length; i++){
-                ruls.getJarNameInclusions().add(cusJarInclusions[i]);
+            for (String cusJarInclusion : cusJarInclusions) {
+                ruls.getJarNameInclusions().add(cusJarInclusion);
             }
         }
 

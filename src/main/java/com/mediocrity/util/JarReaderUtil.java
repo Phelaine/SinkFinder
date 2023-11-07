@@ -58,10 +58,10 @@ public class JarReaderUtil {
 
                 JarEntry jarEntry;
                 while ((jarEntry = jis.getNextJarEntry()) != null) {
-                    String itemName = jarEntry.getName();
+                    String itemName = jarEntry.getName().replaceAll("/", "\\.");
 
                     if (itemName.endsWith(".class") || itemName.endsWith(".class/")) {
-                        if (RuleUtil.isExcluded(itemName.replaceAll("/", "\\."), ruls.getClassExclusions())) {
+                        if (RuleUtil.isExcluded(itemName, ruls.getClassExclusions()) || RuleUtil.isExcluded(itemName, ruls.getJarNameExclusions())) {
                             continue;
                         }
                         streamToNode(jis, jar.getPath());

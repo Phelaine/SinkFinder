@@ -24,8 +24,7 @@ import java.util.Map;
 public class InsnAnalysis {
     private static final Logger logger = LoggerFactory.getLogger(InsnAnalysis.class);
 
-    private static HashSet<String> nullOrNoSubClasses = new HashSet<>();
-    private static String insnMethodOwner;
+    private static final HashSet<String> nullOrNoSubClasses = new HashSet<>();
     private static String insnMethodName;
     private static String insnMethodDesc;
     private static String sourceInfo;
@@ -34,12 +33,12 @@ public class InsnAnalysis {
     private static String sinkClass;
     private static String sinkMethodDesc;
 
-    private static ArrayList<String> subClasses = new ArrayList<>();
+    private static final ArrayList<String> subClasses = new ArrayList<>();
 
     private static Boolean isFind;
 
-    private static ArrayList<String> result = new ArrayList<>();
-    private static HashSet<SinkResult> finalResult = new HashSet<>();
+    private static final ArrayList<String> result = new ArrayList<>();
+    private static final HashSet<SinkResult> finalResult = new HashSet<>();
 
     private static Boolean isRecord = true;
 
@@ -64,9 +63,8 @@ public class InsnAnalysis {
      * 通过 sink 找 source ，并将 source 记录下来
      *
      * @param sink  目标调用规则
-//     * @param depth 最大递归深度
      * @param ruls  规则限制
-//     * @param count 递归深度
+     * @param sinkRule  sink规则信息
      * @return
      */
     private static void findSource(String sink, SinkRule sinkRule, Rules ruls) {
@@ -81,7 +79,7 @@ public class InsnAnalysis {
 
                     insnMethodName = wrapper.getMethodInsnNode().name;
                     insnMethodDesc = wrapper.getMethodInsnNode().desc;
-                    insnMethodOwner = wrapper.getMethodInsnNode().owner;
+                    String insnMethodOwner = wrapper.getMethodInsnNode().owner;
 
                     sinkClass = sink.split(":")[0];
                     sinkMethodDesc = sink.split(":")[1];
@@ -146,13 +144,12 @@ public class InsnAnalysis {
         for (Map.Entry<String, ClassInfo> classInfoEntry: ClassRepo.classes.entrySet()){
             try {
                 String s = classInfoEntry.getValue().getClassNode().superName.replaceAll("/","\\.");
-                if (s.equals("java.lang.Object")) continue;
-                else if (s.contains(superName)){
+                if (s.contains(superName)){
                     subClasses.add(classInfoEntry.getKey());
                     findSubClasses(classInfoEntry.getKey());
                 }
             }catch (Exception e){
-                System.out.println(e.getMessage());
+                logger.error(e.getMessage());
             }
         }
     }
