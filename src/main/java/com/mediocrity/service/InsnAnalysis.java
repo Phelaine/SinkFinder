@@ -89,7 +89,7 @@ public class InsnAnalysis {
                         if (!sinkMethodDesc.equals(insnMethodName + insnMethodDesc)) continue;
                     }
 
-                    if (sinkClass.equals(insnMethodOwner.replaceAll("/", "\\."))) isFind = true;
+                    if (sinkClass.equals(insnMethodOwner.replace("/", "."))) isFind = true;
 
                     // 如果没找到直接调用关系，分别去看是否存在子类调用或接口类调用
                     if ( !isFind ){
@@ -104,7 +104,7 @@ public class InsnAnalysis {
                                     else ClassRepo.classes.get(sinkClass).setSubClasses((ArrayList<String>) subClasses.clone());
                                 }
 
-                                if (info.getSubClasses().contains(insnMethodOwner.replaceAll("/", "\\."))) isFind = true;
+                                if (info.getSubClasses().contains(insnMethodOwner.replace("/", "."))) isFind = true;
                             }
 
                             if ( !isFind ){
@@ -142,8 +142,7 @@ public class InsnAnalysis {
     public static void findSubClasses(String superName){
         for (Map.Entry<String, ClassInfo> classInfoEntry: ClassRepo.classes.entrySet()){
             try {
-                String s = classInfoEntry.getValue().getClassNode().superName.replaceAll("/","\\.");
-                if (s.contains(superName)){
+                if (classInfoEntry.getValue().getClassNode().superName.replace("/",".").equals(superName)){
                     subClasses.add(classInfoEntry.getKey());
                     findSubClasses(classInfoEntry.getKey());
                 }

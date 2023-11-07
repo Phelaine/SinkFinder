@@ -36,6 +36,10 @@
       "severity_level": "High",
       "sinks": ["java.util.zip.ZipInputStream:close"]
     }, {
+      "sink_name": "DynamicInvoke",
+      "severity_level": "High",
+      "sinks": ["java.lang.reflect.Constructor:newInstance","java.lang.reflect.Method:invoke"]
+    }, {
       "sink_name": "Fastjson",
       "severity_level": "Medium",
       "sinks": ["com.alibaba.fastjson.JSON:parseObject","com.alibaba.fastjson.JSON:parse"]
