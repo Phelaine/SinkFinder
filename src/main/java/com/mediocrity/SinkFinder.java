@@ -88,7 +88,7 @@ public class SinkFinder {
                 if (file.isFile() && (file.getName().endsWith(".class") || file.getName().endsWith(".class/") || file.getName().endsWith(".jar") || file.getName().endsWith(".zip"))) {
                     JarReaderUtil.readJar(file, ruls);
                 } else {
-                    String path = file.getName();
+                    String path = file.getPath();
                     if (!RuleUtil.isExcluded(path, ruls.getPathExclusions())) {
                         readFile(file, ruls);
                     }
@@ -102,6 +102,7 @@ public class SinkFinder {
     private void fileStore(ArrayList<SinkResult> sortResults) {
         java.util.Date day = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String out;
 
         if (CUSTOM_SINK_RULE.length() == 0) {
             LOG_FILE = "vul_" + sdf.format(day) + "_" + TARGET_PATH.replace(".", "_").replace("\\", "_").replace(
@@ -128,11 +129,13 @@ public class SinkFinder {
 
             }
 
-            fileWriter.write("共找到 " + count + " 条路径 \n");
-            logger.info("共找到 " + count + " 条路径 \n");
+            out = "共找到 " + count + " 条路径 \n";
+            fileWriter.write(out);
+            logger.info(out);
             for (Map.Entry<String, Integer> entry : countMap.entrySet()) {
-                fileWriter.write(entry.getKey() + " 类别存在：" + entry.getValue() + " 条路径" + "\n");
-                logger.info(entry.getKey() + " 类别存在：" + entry.getValue() + " 条路径" + "\n");
+                out = entry.getKey() + " 类别存在：" + entry.getValue() + " 条路径" + "\n";
+                fileWriter.write(out);
+                logger.info(out);
             }
             fileWriter.flush();
             fileWriter.close();

@@ -1,6 +1,6 @@
 {
   "depth": 1,
-  "path_exclusions": ["AndroidSDK",".idea","resources","META-INF"],
+  "path_exclusions": ["AndroidSDK",".idea","resources","java/lib","META-INF"],
   "jar_name_inclusions": ["*"],
   "jar_name_exclusions": ["spring-boot","logback","lombok","META-INF","log4j","slf4j",
     "spring-context","tomcat-embed-core","spring-web","mysql-connector-java","antlr-"],
