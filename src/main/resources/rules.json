@@ -1,9 +1,8 @@
 {
-  "depth": 4,
-  "path_exclusions": ["AndroidSDK",".idea","resources","META-INF"],
+  "depth": 1,
+  "path_exclusions": ["AndroidSDK",".idea","resources","java\\bin","META-INF"],
   "jar_name_inclusions": ["*"],
-  "jar_name_exclusions": ["spring-boot","logback","lombok","META-INF","log4j","slf4j",
-    "spring-context","tomcat-embed-core","spring-web","mysql-connector-java","antlr-"],
+  "jar_name_exclusions": ["spring-boot","logback","lombok","META-INF","log4j","slf4j","spring-context","spring-aop","spring-bean","tomcat-embed-core","spring-web","mysql-connector-java","antlr-","commons-"],
   "class_inclusions": ["*"],
   "class_exclusions": ["logback","lombok","org.springframework.boot.loader"],
   "sink_rules": [
@@ -14,11 +13,19 @@
     }, {
       "sink_name": "UNSERIALIZE",
       "severity_level": "High",
-      "sinks": ["java.io.ObjectInputStream:readObject","java.io.ObjectInputStream:readUnshared","org.yaml.snakeyaml.Yaml:load","com.thoughtworks.xstream.XStream:fromXML","org.apache.xmlrpc.parser.XmlRpcRequestParser:startElement","java.beans.XMLDecoder:readObject","org.apache.xml.security.transforms.Transforms:performTransforms"]
+      "sinks": ["java.io.ObjectInputStream:readObject","java.io.ObjectInputStream:readUnshared","org.yaml.snakeyaml.Yaml:load"]
+    }, {
+      "sink_name": "XML",
+      "severity_level": "High",
+      "sinks": ["com.thoughtworks.xstream.XStream:fromXML","org.apache.xmlrpc.parser.XmlRpcRequestParser:startElement","java.beans.XMLDecoder:readObject","org.apache.xml.security.transforms.Transforms:performTransforms"]
     }, {
       "sink_name": "JNDI",
       "severity_level": "High",
       "sinks": ["javax.naming.InitialContext:doLookup","javax.naming.InitialContext:lookup"]
+    }, {
+      "sink_name": "AuthBypass",
+      "severity_level": "High",
+      "sinks": ["javax.servlet.http.HttpServletRequest:getRequestURI","javax.servlet.http.HttpServletRequest:getRequestURL"]
     }, {
       "sink_name": "SSTI",
       "severity_level": "High",
@@ -35,6 +42,10 @@
       "sink_name": "ZIPSLIP",
       "severity_level": "High",
       "sinks": ["java.util.zip.ZipInputStream:close"]
+    }, {
+      "sink_name": "DynamicInvoke",
+      "severity_level": "High",
+      "sinks": ["java.lang.reflect.Constructor:newInstance","java.lang.reflect.Method:invoke"]
     }, {
       "sink_name": "Fastjson",
       "severity_level": "Medium",
