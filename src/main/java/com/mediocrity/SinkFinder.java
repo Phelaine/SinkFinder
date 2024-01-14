@@ -246,17 +246,17 @@ public class SinkFinder {
         Option help = Option.builder("h").longOpt("help").required(false).desc("帮助").build();
         options.addOption(help);
 
-        Option DB_Addr = Option.builder("da").longOpt("db_addr").argName("127.0.0.1").hasArg().required(false).desc("数据库地址").build();
-        options.addOption(DB_Addr);
+        // Option DB_Addr = Option.builder("da").longOpt("db_addr").argName("127.0.0.1").hasArg().required(false).desc("数据库地址").build();
+        // options.addOption(DB_Addr);
 
-        Option DB_Name = Option.builder("dn").longOpt("db_name").argName("demo").hasArg().required(false).desc("数据库名").build();
-        options.addOption(DB_Name);
+        // Option DB_Name = Option.builder("dn").longOpt("db_name").argName("demo").hasArg().required(false).desc("数据库名").build();
+        // options.addOption(DB_Name);
 
-        Option DB_User = Option.builder("du").longOpt("db_user").argName("root").hasArg().required(false).desc("数据库用户名").build();
-        options.addOption(DB_User);
+        // Option DB_User = Option.builder("du").longOpt("db_user").argName("root").hasArg().required(false).desc("数据库用户名").build();
+        // options.addOption(DB_User);
 
-        Option DB_PassWD = Option.builder("dp").longOpt("db_passwd").argName("root").hasArg().required(false).desc("数据库密码").build();
-        options.addOption(DB_PassWD);
+        // Option DB_PassWD = Option.builder("dp").longOpt("db_passwd").argName("root").hasArg().required(false).desc("数据库密码").build();
+        // options.addOption(DB_PassWD);
 
         CommandLine cmd;
         HelpFormatter helper = new HelpFormatter();
