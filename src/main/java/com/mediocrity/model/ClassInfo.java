@@ -15,6 +15,7 @@ public class ClassInfo {
     private ClassNode classNode;
     private String jarName;
     private ArrayList<String> subClasses = new ArrayList<>();
+    private ArrayList<String> interfacess = new ArrayList<>();
 
     public ClassInfo(ClassNode classNode, String jarName) {
         this.classNode = classNode;

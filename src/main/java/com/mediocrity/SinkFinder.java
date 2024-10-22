@@ -85,7 +85,7 @@ public class SinkFinder {
         File[] files = dir.listFiles();
         if (files != null) {
             for (File file : files) {
-                if (file.isFile() && (file.getName().endsWith(".class") || file.getName().endsWith(".class/") || file.getName().endsWith(".jar") || file.getName().endsWith(".zip"))) {
+                if (file.isFile() && (file.getName().endsWith(".class") || file.getName().endsWith(".class/") || file.getName().endsWith(".jar") || file.getName().endsWith(".zip") || file.getName().endsWith(".war"))) {
                     JarReaderUtil.readJar(file, ruls);
                 } else {
                     String path = file.getPath();
@@ -94,14 +94,14 @@ public class SinkFinder {
                     }
                 }
             }
-        } else if (dir.isFile() && (dir.getName().endsWith(".class") || dir.getName().endsWith(".class/") || dir.getName().endsWith(".jar") || dir.getName().endsWith(".zip"))) {
+        } else if (dir.isFile() && (dir.getName().endsWith(".class") || dir.getName().endsWith(".class/") || dir.getName().endsWith(".jar") || dir.getName().endsWith(".zip") || dir.getName().endsWith(".war"))) {
             JarReaderUtil.readJar(dir, ruls);
         }
     }
 
     private void fileStore(ArrayList<SinkResult> sortResults) {
         java.util.Date day = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmm");
         String out;
 
         if (CUSTOM_SINK_RULE.length() == 0) {
