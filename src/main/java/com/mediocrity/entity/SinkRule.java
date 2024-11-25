@@ -15,8 +15,6 @@ public class SinkRule {
     private String severityLevel;
     private ArrayList<String> sinks;
 
-    public SinkRule(){}
-
     public SinkRule(String sinkName, String severityLevel, ArrayList<String> sinks){
         this.sinkName = sinkName;
         this.severityLevel = severityLevel;

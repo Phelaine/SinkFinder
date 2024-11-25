@@ -1,11 +1,12 @@
 {
-  "depth": 1,
+  "depth": 3,
+  "dashscope_api_key": "",
   "path_exclusions": ["AndroidSDK",".idea","resources","java\\bin","META-INF"],
   "jar_name_inclusions": ["*"],
-  "jar_name_exclusions": ["spring-boot","logback","lombok","META-INF","log4j","slf4j",
-    "spring-context","spring-aop","spring-bean","tomcat-embed-core","spring-web","mysql-connector-java","antlr-","commons-"],
+  "jar_name_exclusions": ["SinkFinder","spring-","logback","lombok","META-INF","log4j","slf4j","tomcat-","mysql-connector-java",
+    "antlr-","commons-","dubbo-","jetty-","groovy-","netty-","collections-","jboss-","rxjava-","mybatis-","guava-","test","ehcache-","batik-"],
   "class_inclusions": ["*"],
-  "class_exclusions": ["logback","lombok","org.springframework.boot.loader"],
+  "class_exclusions": ["logback","lombok"],
   "sink_rules": [
     {
       "sink_name": "RCE",
@@ -58,7 +59,7 @@
     }, {
       "sink_name": "SSRF",
       "severity_level": "Medium",
-      "sinks": ["java.net.URL:openConnection","java.net.URL:openStream","org.apache.http.client.fluent.Request:Get","javax.imageio.ImageIO:read","com.squareup.okhttp.OkHttpClient:newCall","org.apache.http.impl.client.CloseableHttpClient:execute","org.jsoup.Jsoup:connect","org.apache.commons.io.IOUtils:toByteArray"]
+      "sinks": ["java.net.URL:openConnection","java.net.URL:openStream","org.apache.http.client.fluent.Request:Get","javax.imageio.ImageIO:read","com.squareup.okhttp.OkHttpClient:newCall","org.apache.http.impl.client.CloseableHttpClient:execute","org.jsoup.Jsoup:connect","org.apache.commons.io.IOUtils:toByteArray","org.apache.http.client.HttpClient:execute"]
     }
   ]
 }

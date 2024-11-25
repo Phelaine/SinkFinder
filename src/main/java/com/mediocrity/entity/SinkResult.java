@@ -33,22 +33,35 @@ public class SinkResult{
     public String toString(boolean isPrint){
         String[] header;
         String[][] rows;
+        int j = 0;
         if (isPrint) {
-            header = new String[]{"Depth", "Source", "Jar/Class"};
-            rows = new String[getInvokeLength()][3];
+            header = new String[]{"层数", "路径[Class:Method]", "Jar/War/ZIP文件路径"};
+            rows = new String[invokeLength + 1][3];
         }
         else {
-            header = new String[]{"Depth", "Source", "Method Signature", "Jar/Class"};
-            rows = new String[getInvokeLength()][4];
+            header = new String[]{"层数", "路径[Class:Method]", "Method Signature", "Jar/War/ZIP文件路径"};
+            rows = new String[invokeLength + 1][4];
         }
-        for (int i = 0; i < getInvokeLength(); i++) {
-            String vul = getInvokeDetail().get(i+1);
-            rows[i][0] = String.valueOf(i+1);
-            rows[i][1] = vul.substring(vul.indexOf('#') + 1, vul.indexOf('('));
-            if (!isPrint) rows[i][2] = vul.substring(vul.indexOf('('));
-            else rows[i][2] = vul.substring(0, vul.indexOf('#'));
-            if (!isPrint) rows[i][3] = vul.substring(0, vul.indexOf('#'));
+        for (int i = invokeLength+1; i > 0 ; i--) {
+            String vul = invokeDetail.get(i-1);
+            rows[j][0] = String.valueOf(j+1);
+
+            if ( vul.indexOf('(') == -1 ) {
+                rows[j][1] = vul;
+                j++;
+                continue;
+            }
+
+            rows[j][1] = vul.substring(vul.indexOf('#') + 1, vul.indexOf('('));
+            if (!isPrint) {
+                rows[j][2] = vul.substring(vul.indexOf('('));
+                rows[j][3] = vul.substring(0, vul.indexOf('#'));
+            }
+            else
+                rows[j][2] = vul.substring(0, vul.indexOf('#'));
+
+            j++;
         }
-        return sinkCata + " - " + sinkLevel + " - " + getInvokeDetail().get(0) + "\n" + new TextTable(header, rows);
+        return sinkCata + " - " + sinkLevel + " - " + invokeDetail.get(0) +  "\n" + new TextTable(header, rows);
     }
 }

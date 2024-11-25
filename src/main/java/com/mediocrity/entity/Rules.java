@@ -12,6 +12,7 @@ import java.util.ArrayList;
 @Data
 public class Rules {
     private int depth;
+    private String dashscopeApiKey;
     private ArrayList<String> pathExclusions;
     private ArrayList<String> jarNameInclusions;
     private ArrayList<String> jarNameExclusions;

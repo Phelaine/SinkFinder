@@ -3,7 +3,7 @@ package com.mediocrity.util;
 import com.mediocrity.SinkFinder;
 import com.mediocrity.entity.Rules;
 import com.mediocrity.model.ClassInfo;
-import com.mediocrity.model.ClassRepo;
+import com.mediocrity.model.ClassZoom;
 import lombok.extern.slf4j.Slf4j;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
@@ -25,15 +24,14 @@ import java.util.zip.ZipFile;
  * @date: 2023/10/13
  */
 @Slf4j
-public class JarReaderUtil {
-    private static final Logger logger = LoggerFactory.getLogger(JarReaderUtil.class);
+public class ClassReaderUtil {
+    private static final Logger logger = LoggerFactory.getLogger(ClassReaderUtil.class);
 
     /**
-     * 读取 Class文件并转换为 ClassNode.
+     * 读取 Class 文件并转换为 ClassNode.
      *
-     * @param jar         The jar file with the classes.
+     * @param jar The jar file with the classes.
      * @param ruls
-//     * @param isSingleJar
      */
     public static void readJar(File jar, Rules ruls) {
         String[] names = jar.getName().split("\\\\");
@@ -71,8 +69,7 @@ public class JarReaderUtil {
                     }
                 }
             } catch (Exception e) {
-                if (e instanceof ZipException &&
-                        e.getMessage().contains("invalid entry CRC")) {
+                if (e instanceof ZipException && e.getMessage().contains("invalid entry CRC")) {
                     try (ZipFile zf = new ZipFile(jar)) {
                         final Enumeration<? extends ZipEntry> entries = zf.entries();
                         while (entries.hasMoreElements()) {
@@ -104,10 +101,11 @@ public class JarReaderUtil {
             if ( !RuleUtil.isExcluded(itemName, ruls.getJarNameExclusions()) && RuleUtil.isIncluded(itemName,
                     ruls.getJarNameInclusions()) ) {
                 File tempFile = File.createTempFile(name + "@", itemName);
-
                 jarInputStreamToFile(jis, tempFile);
 
                 readJar(tempFile, ruls);
+
+                tempFile.delete();
             }
         }
     }
@@ -149,7 +147,7 @@ public class JarReaderUtil {
             jarName = jarName.replace(SinkFinder.TARGET_PATH,"${PATH}");
 
             final ClassInfo classInfo = new ClassInfo(node, jarName);
-            ClassRepo.classes.put(node.name.replace("/","."), classInfo);
+            ClassZoom.classes.put(node.name.replace("/","."), classInfo);
         } catch (IOException e) {
             e.printStackTrace();
         }
