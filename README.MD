@@ -2,7 +2,7 @@
 
 ### 功能说明
 
-[闭源系统半自动漏洞挖掘工具](https://mp.weixin.qq.com/s/pKA0eG0B_yMkeV2-C1edWw)，针对 jar/war/zip 进行静态代码分析，增加LLM大模型能力验证路径是否能抵达，根据上下文代码逻辑给出该路径可信分数
+[闭源系统半自动漏洞挖掘工具](https://mp.weixin.qq.com/s/pKA0eG0B_yMkeV2-C1edWw)，针对 jar/war/zip 进行静态代码分析，增加LLM大模型能力验证路径可达性，LLM根据上下文代码环境给出该路径可信分数
 
 
 ### 运行说明
@@ -33,8 +33,10 @@ usage: SinkFinder
  -sci,--sink_category_include <arg>   配置sink规则类别
 ```
 
-* 运行配置可通过参数进行覆盖，跑第一次会吐出rule.json配置文件，-r可自定义配置
-* LLM能力需要配置通义的APIKEY：更新rule.json中dashscope_api_key值/通过-lk参数指定（也可环境变量配置：export DASHSCOPE_API_KEY="sk-xxx"
+* 配置均可通过运行参数进行覆盖
+* 跑第一次会吐出rule.json配置文件，-r可自定义配置
+* LLM能力需要配置通义的APIKEY：更新rule.json中dashscope_api_key/通过-lk参数指定/环境变量配置：export DASHSCOPE_API_KEY="sk-xxx"
+
 
 参考运行命令：
 ```shell
@@ -119,4 +121,4 @@ java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -p 代码路径 -d �
  }
 ```
 
-**_欢迎Star&交流～_**
+**_欢迎 Star & 交流 ～_**
