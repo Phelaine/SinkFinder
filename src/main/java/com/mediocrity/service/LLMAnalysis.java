@@ -143,6 +143,7 @@ public class LLMAnalysis {
             if (!log.exists()) {
                 log.createNewFile();
             }
+            write("[toc]\n");
             lock = new ReentrantLock();
         }catch (IOException e) {
             throw new RuntimeException(e);
