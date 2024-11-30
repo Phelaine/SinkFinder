@@ -103,7 +103,9 @@ public class LLMAnalysis {
             param.setApiKey(apiKey);
         else if (System.getenv("DASHSCOPE_API_KEY")!=null && !System.getenv("DASHSCOPE_API_KEY").isEmpty())
             param.setApiKey(System.getenv("DASHSCOPE_API_KEY"));
-        else throw new RuntimeException("请通过配置文件或环境变量配置通义APIKEY（sk-xxx）");
+        else{
+            throw new RuntimeException("未识别到通义APIKEY，请通过配置文件或环境变量配置DASHSCOPE_API_KEY（sk-xxx）");
+        }
 //        logger.info("请求参数："+param.toString());
         try {
             result = gen.call(param);

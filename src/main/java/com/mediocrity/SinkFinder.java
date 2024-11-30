@@ -102,11 +102,13 @@ public class SinkFinder {
         String out;
 
         if (CUSTOM_SINK_RULE.length() == 0) {
-            LOG_FILE = "vul_" + sdf.format(day) + "_" + TARGET_PATH.replace(".", "_").replace("\\", "_").replace(
-                    "/", "_").replace(":","") + isFilter + ".log";
-        }
-        else{
-            LOG_FILE = "vul_" + sdf.format(day) + "_" + CUSTOM_SINK_RULE.split(":")[0].replace(".","_") + isFilter + ".log";
+            String[] f = TARGET_PATH.split("/");
+            if (f.length == 1)
+                f = TARGET_PATH.split("\\\\");
+            LOG_FILE = "vul_" + sdf.format(day) + "_" + f[f.length-1].replace(".", "_").replace(":","") + "_" + isFilter + ".log";
+        } else{
+            String[] f = CUSTOM_SINK_RULE.split(":")[0].split("\\.");
+            LOG_FILE = "vul_" + sdf.format(day) + "_" + f[f.length-1] + "_" + CUSTOM_SINK_RULE.split(":")[1].replace(".", "_").replace("(","_").replace(")","_").replace(";","_") + "_" + isFilter + ".log";
         }
 
         File log = new File("logs" + File.separator + LOG_FILE);
@@ -235,6 +237,10 @@ public class SinkFinder {
 
             if (cmd.hasOption("s")) {
                 CUSTOM_SINK_RULE = cmd.getOptionValue("sink");
+                if (!CUSTOM_SINK_RULE.contains(":")){
+                    log.warn("自定义sink规则格式参考：全类名:方法名[方法签名]，方法签名可选");
+                    System.exit(0);
+                }
                 log.info("自定义sink规则: " + CUSTOM_SINK_RULE);
             }
 

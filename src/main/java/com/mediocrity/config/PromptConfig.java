@@ -6,7 +6,7 @@ public class PromptConfig {
             "你的分析必须：" +
             "- 非常关键：仔细跟踪从入口(source)到高风险功能(sink)的用户输入流；" +
             "- 考虑Java的动态语言特性，继承关系、实现接口等动态链路；" +
-            "- 考虑反射调用、异步执行的方式；" +
+            "- 考虑反射调用、异步等执行方式；" +
             "- 识别代码中的限制，包括方法的注解、调用了安全控制方法等，考虑最新的攻击利用方法是否能绕过安全机制" +
             "以10分制给出你的判断，10分为确认可到达sink点，0分为确认不可到达sink点";
     public static String GUIDELINES_TEMPLATE = "分析指南:" +
@@ -17,7 +17,7 @@ public class PromptConfig {
             "- 检查输入验证、规范化处理、过滤。" +
             "- 分析数据流是如何处理、存储、输出。" +
             "2. 代码调用链格式：" +
-            "- 首先表明SINK点的信息：sink点类型（RCE/SSRF/UNSERIALIZE/XXE/JNDI/ZIPSLIP/SSTI/SPEL/AuthBypass等）、sink点描述、等级（HIGH/MEDIUM/LOW）、最终sink触发点（全类名:方法名）。或者为其他自定义的sink点类型（CUSTOM）。该信息可作为路径分析时的参考。" +
+            "- 首先表明SINK点的信息：sink点类型（RCE/SSRF/UNSERIALIZE/XXE/JNDI/ZIPSLIP/SSTI/SPEL/AuthBypass等）、sink点描述、等级（HIGH/MEDIUM/LOW）、最终sink触发点。若为其他自定义安全风险sink点，则其类型及等级均为CUSTOM。该信息可作为路径分析时的参考。" +
             "- 代码调用链中一行即为一个调用链的其中一个节点，每个节点包含以下内容：调用链中的层数、方法调用路径（全类名:方法名(方法签名)）、Jar/War/Zip文件路径，以“|”分隔。其中第一层节点为调用链入口（source）；最后一层节点为高危功能风险点（sink），可能没有方法签名、文件路径等字段。文件路径无需重点关注。" +
             "3. 上下文分析：" +
             "- 分析时机智的利用代码调用链中的上下文代码逻辑构建对整个攻击链的全局理解。" +

@@ -15,7 +15,7 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_DIR}/logFile.log</file>
+        <file>${LOG_DIR}/consoleLog/logFile.log</file>
         <append>true</append>
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
@@ -24,7 +24,7 @@
 
     <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_DIR}/dayLogFile.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${LOG_DIR}/consoleLog/dayLogFile.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
