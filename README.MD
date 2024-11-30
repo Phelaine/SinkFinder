@@ -35,13 +35,21 @@ usage: SinkFinder
 
 * 配置均可通过运行参数进行覆盖
 * 跑第一次会吐出rule.json配置文件，-r可自定义配置
-* LLM能力需要配置通义的APIKEY：更新rule.json中dashscope_api_key/通过-lk参数指定/环境变量配置：export DASHSCOPE_API_KEY="sk-xxx"
+* LLM能力需要配置通义的APIKEY（默认不启用LLM）：
+  * 更新rule.json中dashscope_api_key;
+  * 通过-lk参数指定;
+  * 环境变量配置：export DASHSCOPE_API_KEY="sk-xxx"
 
 
 参考运行命令：
 ```shell
 java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -p 代码路径 -d 遍历路径递归深度
 ```
+
+_运行结果保存在logs目录文件中：_
+* _llm结尾为+LLM结果_
+* _true结尾文件为过滤source为远程入口_
+* _false结尾文件未过滤source_
 
 ### 规则说明
 
