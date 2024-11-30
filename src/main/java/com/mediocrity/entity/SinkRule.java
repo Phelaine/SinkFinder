@@ -12,17 +12,19 @@ import java.util.ArrayList;
 @Data
 public class SinkRule {
     private String sinkName;
+    private String sinkDesc;
     private String severityLevel;
     private ArrayList<String> sinks;
 
-    public SinkRule(String sinkName, String severityLevel, ArrayList<String> sinks){
+    public SinkRule(String sinkName, String sinkDesc, String severityLevel, ArrayList<String> sinks){
         this.sinkName = sinkName;
+        this.sinkDesc = sinkDesc;
         this.severityLevel = severityLevel;
         this.sinks = sinks;
     }
 
     public String toString(){
-        return sinkName + " - " + severityLevel + " : " + sinks;
+        return sinkName + " - " + sinkDesc + " - " + severityLevel + " : " + sinks;
     }
 
 }

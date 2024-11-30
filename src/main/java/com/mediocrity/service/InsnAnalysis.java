@@ -162,7 +162,7 @@ public class InsnAnalysis {
 
                         if ( isRecord ) {
 
-                            //todo 遍历source是不是在filterResult中
+                            // source如果在filterResult中，拼接路径
                             if( pathZoom.contains(source) ){
                                 for (SinkResult re : filterResult){
                                     int i = re.getInvokeDetail().indexOf(source);
@@ -177,7 +177,7 @@ public class InsnAnalysis {
                                 }
                             }
 
-                            SinkResult s = new SinkResult(count, sinkRule.getSinkName(), sinkRule.getSeverityLevel(),
+                            SinkResult s = new SinkResult(count, sinkRule.getSinkName(), sinkRule.getSinkDesc(), sinkRule.getSeverityLevel(),
                                     (ArrayList<String>) result.clone());
 
                             resultsZoom.add(s);

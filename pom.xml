@@ -102,6 +102,13 @@
             <version>1.5.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>data-factory-core</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+
+
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
 <!--        <dependency>-->
 <!--            <groupId>mysql</groupId>-->

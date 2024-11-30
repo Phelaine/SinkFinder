@@ -72,24 +72,24 @@ public class LLMAnalysis {
                 pathClass.add(className);
             }
 
-            String sr = s.toString(false);
+//            String sr = s.toString(true,false);
             String finalContext = contextString.toString();
-            llmTask = ThreadPoolUtil.submit(() -> call(finalContext, sr, apiKey));
+            llmTask = ThreadPoolUtil.submit(() -> call(finalContext, s, apiKey));
         } catch (Exception e) {
             logger.info("AsyncProcessor executeTask error", e);
         }
     }
 
-    public static Boolean call(String contextClass, String pathResult, String apiKey) {
+    public static Boolean call(String contextClass, SinkResult pathResult, String apiKey) {
         Generation gen = new Generation();
         GenerationParam param;
         GenerationResult result;
         StringBuilder sb =  new StringBuilder();
-        sb.append("\n\n").append(pathResult).append("\n");
+        sb.append("\n\n").append(pathResult.toString(false,true)).append("\n");
 
         List<Message> messages = new ArrayList<>(Arrays.asList(systemMsg, analysisMsg));
 
-        Message msg = Message.builder().role(Role.USER.getValue()).content("最终高危风险功能点及代码调用链如下：" + pathResult).build();
+        Message msg = Message.builder().role(Role.USER.getValue()).content("最终高危风险功能点及代码调用链如下：" + pathResult.toString(true,true)).build();
         Message msg1 = Message.builder().role(Role.USER.getValue()).content("上下文代码：" + contextClass).build();
         messages.addAll(Arrays.asList(msg, msg1));
 
@@ -116,7 +116,7 @@ public class LLMAnalysis {
 //            logger.info("\n大模型结果：" + result.getOutput().getChoices().get(i).getMessage().getContent());
         }
 
-        llmResult.add(sb.toString());
+//        llmResult.add(sb.toString());
         LLMAnalysis.write(sb.toString());
         logger.info(sb.toString());
         return true;

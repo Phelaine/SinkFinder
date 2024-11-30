@@ -69,7 +69,7 @@ public class ClassReaderUtil {
                     }
                 }
             } catch (Exception e) {
-                if (e instanceof ZipException && e.getMessage().contains("invalid entry CRC")) {
+                if (e instanceof ZipException) {
                     try (ZipFile zf = new ZipFile(jar)) {
                         final Enumeration<? extends ZipEntry> entries = zf.entries();
                         while (entries.hasMoreElements()) {
@@ -88,6 +88,8 @@ public class ClassReaderUtil {
                     } catch (IOException e2) {
                         e2.printStackTrace();
                     }
+                }else {
+                    System.out.println(e.getMessage());
                 }
             }
         }

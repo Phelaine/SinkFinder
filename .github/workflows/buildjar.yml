@@ -2,9 +2,9 @@ name: buildjar
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "llm" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "llm" ]
 
 jobs:
   build:

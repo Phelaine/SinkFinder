@@ -301,7 +301,7 @@ public class SinkFinder {
         if (!CUSTOM_SINK_RULE.isEmpty()) {
             String[] cusSinkRules = CUSTOM_SINK_RULE.split(",");
             ruls.getSinkRules().clear();
-            SinkRule sinkRule = new SinkRule("CUSTOM","CUSTOM", new ArrayList<>());
+            SinkRule sinkRule = new SinkRule("CUSTOM","自定义Sink点","CUSTOM", new ArrayList<>());
             for (String cusSinkRule : cusSinkRules) {
                 sinkRule.getSinks().add(cusSinkRule);
             }
