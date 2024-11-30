@@ -2,7 +2,7 @@
 
 ### 功能说明
 
-[闭源系统半自动漏洞挖掘工具](https://mp.weixin.qq.com/s/pKA0eG0B_yMkeV2-C1edWw)，针对 jar/war/zip 进行静态代码分析，增加LLM大模型能力验证路径可达性，LLM根据上下文代码环境给出该路径可信分数
+[闭源系统半自动漏洞挖掘工具](https://mp.weixin.qq.com/s/pKA0eG0B_yMkeV2-C1edWw)，针对 jar/war/zip 进行静态代码分析，增加 LLM 大模型能力验证路径可达性，LLM 根据上下文代码环境给出该路径可信分数
 
 
 ### 运行说明
@@ -34,10 +34,10 @@ usage: SinkFinder
 ```
 
 * 配置均可通过运行参数进行覆盖
-* 跑第一次会吐出rule.json配置文件，-r可自定义配置
-* LLM能力需要配置通义的APIKEY（默认不启用LLM）：
-  * 更新rule.json中dashscope_api_key;
-  * 通过-lk参数指定;
+* 跑第一次会吐出 rule.json 配置文件， -r 可自定义配置
+*  LLM 能力需要配置通义的 APIKEY（默认不启用 LLM ）：
+  * 更新 rule.json 中 dashscope_api_key ;
+  *  -lk 参数指定;
   * 环境变量配置：export DASHSCOPE_API_KEY="sk-xxx"
 
 
@@ -47,9 +47,9 @@ java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -p 代码路径 -d �
 ```
 
 _运行结果保存在logs目录文件中：_
-* _llm结尾为+LLM结果_
-* _true结尾文件为过滤source为远程入口_
-* _false结尾文件未过滤source_
+* llm 结尾文件： 已过滤 source + LLM 结果
+* true 结尾文件：已过滤 source 
+* false 结尾文件：未过滤 source ，所有结果
 
 ### 规则说明
 
