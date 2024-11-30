@@ -1,11 +1,13 @@
 # SinkFinder + LLM
+```shell
        _         _      __  _             _             
       (_)       | |    / _|(_)           | |            
 ___  _  _ __  | | __| |_  _  _ __    __| |  ___  _ __
 / __|| || '_ \ | |/ /|  _|| || '_ \  / _` | / _ \| '__|
 \__ \| || | | ||   < | |  | || | | || (_| ||  __/| |   
 |___/|_||_| |_||_|\_\|_|  |_||_| |_| \__,_| \___||_|   
-0.2@medi0cr1ty
+                                         0.2@medi0cr1ty
+```
 
 ### 功能说明
 
@@ -93,13 +95,38 @@ ___  _  _ __  | | __| |_  _  _ __    __| |  ___  _ __
 参数说明：
 ```
 java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -h
+       _         _      __  _             _             
+      (_)       | |    / _|(_)           | |            
+  ___  _  _ __  | | __| |_  _  _ __    __| |  ___  _ __ 
+ / __|| || '_ \ | |/ /|  _|| || '_ \  / _` | / _ \| '__|
+ \__ \| || | | ||   < | |  | || | | || (_| ||  __/| |   
+ |___/|_||_| |_||_|\_\|_|  |_||_| |_| \__,_| \___||_|   
+                                             0.2@medi0cr1ty
+                                                        
+usage: SinkFinder
+ -cb,--class_exclusions <arg>         自定义class_exclusions规则，类黑名单
+ -ci,--class_inclusions <arg>         自定义class_inclusions规则，类白名单
+ -d,--depth <3>                       指定递归查找深度
+ -h,--help                            帮助
+ -jb,--jar_exclusions <arg>           自定义jar_exclusions规则，jar包黑名单
+ -ji,--jar_inclusions <arg>           自定义jar_inclusions规则，jar包白名单
+ -l,--llm                             启用通义大模型能力
+ -lk,--llm_key <arg>                  配置通义大模型 API KEY（sk-xxx）
+ -p,--path <arg>                      指定目标分析路径
+ -r,--rule <rules.json>               指定Sink JSON规则路径，初始化默认resources/rules.json
+ -s,--sink <arg>                      自定义sink规则
+ -scb,--sink_category_block <arg>     禁用sink规则类别
+ -sci,--sink_category_include <arg>   配置sink规则类别
 ```
-![img.png](img.png)
-运行配置可通过参数进行覆盖，跑第一次会吐出rule.json配置文件，-r可自定义配置
-LLM能力需要配置通义的APIKEY：配置rule.json中dashscope_api_key值/通过-lk参数配置（也可环境变量配置：export DASHSCOPE_API_KEY="sk-xxx"
 
-运行参考命令：java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -p 代码路径 -d 遍历路径递归深度
+* 运行配置可通过参数进行覆盖，跑第一次会吐出rule.json配置文件，-r可自定义配置
+* LLM能力需要配置通义的APIKEY：更新rule.json中dashscope_api_key值/通过-lk参数指定（也可环境变量配置：export DASHSCOPE_API_KEY="sk-xxx"
+
+参考运行命令：
+```shell
+java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -p 代码路径 -d 遍历路径递归深度
+```
 
 其他可参考文章：https://mp.weixin.qq.com/s/pKA0eG0B_yMkeV2-C1edWw
 
-欢迎Star&交流～
+**欢迎Star&交流～**
