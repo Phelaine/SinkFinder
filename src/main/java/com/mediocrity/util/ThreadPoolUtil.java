@@ -69,6 +69,7 @@ public class ThreadPoolUtil {
     }
 
     public static <T> Future<T> submit(Callable<T> task) {
+        logger.info("异步调用大模型能力中......");
         return executor.submit(task);
     }
 

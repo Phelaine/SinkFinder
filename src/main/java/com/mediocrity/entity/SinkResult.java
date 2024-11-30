@@ -27,11 +27,6 @@ public class SinkResult{
         this.invokeDetail = result;
     }
 
-//    public String toString(){
-//        return String.format(format, invokeLength, sinkCata, sinkLevel,
-//                String.join("\t", invokeDetail));
-//    }
-
     public String toString(boolean isPrint){
         String[] header;
         String[][] rows;
@@ -101,6 +96,6 @@ public class SinkResult{
             j++;
         }
 
-        return sinkCata + " - " + sinkDesc + " - " + sinkLevel + " - " + invokeDetail.get(0) +  "\n\n" + header +"\n";
+        return "## " + sinkCata + " - " + sinkDesc + " - " + sinkLevel + " - " + invokeDetail.get(0) +  "\n\n" + header +"\n";
     }
 }
