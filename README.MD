@@ -36,9 +36,9 @@ usage: SinkFinder
 * 配置均可通过运行参数进行覆盖
 * 跑第一次会吐出 rule.json 配置文件， -r 可自定义配置
 *  LLM 能力需要配置通义的 APIKEY（默认不启用 LLM ）：
-  * 更新 rule.json 中 dashscope_api_key ;
-  *  -lk 参数指定;
-  * 环境变量配置：export DASHSCOPE_API_KEY="sk-xxx"
+    * 更新 rule.json 中 dashscope_api_key ;
+    *  -lk 参数指定;
+    * 环境变量配置：export DASHSCOPE_API_KEY="sk-xxx"
 
 
 参考运行命令：
@@ -46,14 +46,14 @@ usage: SinkFinder
 java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -p 代码路径 -d 遍历路径递归深度
 ```
 
-_运行结果保存在logs目录文件中：_
+_运行结果保存在 logs 目录下：_
 * llm 结尾文件： 已过滤 source + LLM 结果
 * true 结尾文件：已过滤 source 
 * false 结尾文件：未过滤 source ，所有结果
 
 ### 规则说明
 
-符号"*"仅可用于_inclusions相关的，表示允许所有。规则的白名单优先级高于黑名单。
+符号 "*" 仅可用于 *_inclusions 相关的，表示允许所有。规则的白名单优先级高于黑名单。
 
 ```angular2html
 {
