@@ -161,7 +161,7 @@ public class SinkFinder {
         Option path = Option.builder("p").longOpt("path").hasArg().required(false).desc("指定目标分析路径").build();
         options.addOption(path);
 
-        Option rule = Option.builder("r").longOpt("rule").argName("rules.json").hasArg().required(false).desc("指定sink JSON规则路径，初始化默认resources/rules.json").build();
+        Option rule = Option.builder("r").longOpt("rule").argName("rules.json").hasArg().required(false).desc("指定Sink JSON规则路径，初始化默认resources/rules.json").build();
         options.addOption(rule);
 
         Option sink = Option.builder("s").longOpt("sink").hasArg().required(false).desc("自定义sink规则").build();

@@ -1,4 +1,11 @@
 # SinkFinder + LLM
+       _         _      __  _             _             
+      (_)       | |    / _|(_)           | |            
+___  _  _ __  | | __| |_  _  _ __    __| |  ___  _ __
+/ __|| || '_ \ | |/ /|  _|| || '_ \  / _` | / _ \| '__|
+\__ \| || | | ||   < | |  | || | | || (_| ||  __/| |   
+|___/|_||_| |_||_|\_\|_|  |_||_| |_| \__,_| \___||_|   
+0.2@medi0cr1ty
 
 ### 功能说明
 
@@ -81,3 +88,18 @@
     ]
  }
 ```
+
+### 运行说明
+参数说明：
+```
+java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -h
+```
+![img.png](img.png)
+运行配置可通过参数进行覆盖，跑第一次会吐出rule.json配置文件，-r可自定义配置
+LLM能力需要配置通义的APIKEY：配置rule.json中dashscope_api_key值/通过-lk参数配置（也可环境变量配置：export DASHSCOPE_API_KEY="sk-xxx"
+
+运行参考命令：java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -p 代码路径 -d 遍历路径递归深度
+
+其他可参考文章：https://mp.weixin.qq.com/s/pKA0eG0B_yMkeV2-C1edWw
+
+欢迎Star&交流～
