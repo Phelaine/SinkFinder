@@ -74,7 +74,8 @@ public class SinkFinder {
         ArrayList<SinkResult> sortFilterResults = new ArrayList<>(InsnAnalysis.filterResult);
         sinkFinder.fileStore(sortFilterResults, true);
 
-        logger.info("任务完成！");
+        if (LLM_ENABLE) logger.info("分析任务完成! 调用大模型能力异步任务执行中....");
+        else logger.info("分析任务完成！");
     }
 
     public static void readFile(File dir, Rules ruls) {
