@@ -2,6 +2,7 @@ package com.mediocrity.util;
 
 import com.mediocrity.model.NodeInfo;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import java.util.ArrayList;
@@ -37,6 +38,17 @@ public class ASMInsnsUtil {
         cn.methods.forEach(m -> m.instructions.forEach(i -> nodes.add(
                 new NodeInfo(cn, m, i))));
 
+        return nodes;
+    }
+
+    public static List<NodeInfo> getDynamicInsnInClass(ClassNode cn) {
+        final List<NodeInfo> nodes = new ArrayList<>();
+
+        cn.methods.forEach(m -> m.instructions.forEach(i ->{
+            if (i instanceof InvokeDynamicInsnNode) {
+                nodes.add(new NodeInfo(cn, m, (InvokeDynamicInsnNode) i));
+            }
+        }));
         return nodes;
     }
 }

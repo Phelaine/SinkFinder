@@ -1,10 +1,7 @@
 package com.mediocrity.model;
 
 import lombok.Data;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.*;
 
 /**
  * @author: medi0cr1ty
@@ -18,6 +15,7 @@ public class NodeInfo {
     private final MethodNode methodNode;
     private MethodInsnNode methodInsnNode;      // 方法调用操作码节点 - METHOD_INSN - 5
     private AbstractInsnNode abstractInsnNode;  // 抽象操作码节点 - 所有操作码节点父类
+    private InvokeDynamicInsnNode dynamicInsnNode;  // 动态方法调用操作码节点 - 所有操作码节点父类
 
     public NodeInfo(ClassNode classNode, MethodNode methodNode, MethodInsnNode methodInsnNode) {
         this.classNode = classNode;
@@ -29,6 +27,12 @@ public class NodeInfo {
         this.classNode = classNode;
         this.methodNode = methodNode;
         this.abstractInsnNode = abstractInsnNode;
+    }
+
+    public NodeInfo(ClassNode classNode, MethodNode methodNode, InvokeDynamicInsnNode dynamicInsnNode) {
+        this.classNode = classNode;
+        this.methodNode = methodNode;
+        this.dynamicInsnNode = dynamicInsnNode;
     }
 
 }

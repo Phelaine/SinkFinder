@@ -2,20 +2,19 @@
 
 ### 功能说明
 
-[闭源系统半自动漏洞挖掘工具](https://mp.weixin.qq.com/s/pKA0eG0B_yMkeV2-C1edWw)，针对 jar/war/zip 进行静态代码分析，增加 LLM 大模型能力验证路径可达性，LLM 根据上下文代码环境给出该路径可信分数
+[闭源系统半自动漏洞挖掘工具](https://mp.weixin.qq.com/s/pKA0eG0B_yMkeV2-C1edWw)，针对 jar/war/zip 进行静态代码分析，增加 LLM 大模型能力验证路径可达性，LLM根据上下文代码环境判断该路径可信分数。
 
 
 ### 运行说明
 参数说明：
 ```
-java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -h
        _         _      __  _             _             
       (_)       | |    / _|(_)           | |            
   ___  _  _ __  | | __| |_  _  _ __    __| |  ___  _ __ 
  / __|| || '_ \ | |/ /|  _|| || '_ \  / _` | / _ \| '__|
  \__ \| || | | ||   < | |  | || | | || (_| ||  __/| |   
  |___/|_||_| |_||_|\_\|_|  |_||_| |_| \__,_| \___||_|   
-                                             0.2@medi0cr1ty
+                                             2.0@medi0cr1ty
                                                         
 usage: SinkFinder
  -cb,--class_exclusions <arg>         自定义class_exclusions规则，类黑名单
@@ -26,15 +25,16 @@ usage: SinkFinder
  -ji,--jar_inclusions <arg>           自定义jar_inclusions规则，jar包白名单
  -l,--llm                             启用通义大模型能力
  -lk,--llm_key <arg>                  配置通义大模型 API KEY（sk-xxx）
- -p,--path <arg>                      指定目标分析路径
- -r,--rule <rules.json>               指定Sink JSON规则路径，初始化默认resources/rules.json
- -s,--sink <arg>                      自定义sink规则
+ -p,--path <arg>                      指定目标分析路径，支持多个以,分隔
+ -r,--rule <rules.json>               指定Sink
+                                      JSON规则路径，初始化默认resources/rules.json
+ -s,--sink <arg>                      自定义sink规则，可添加多个以,分隔
  -scb,--sink_category_block <arg>     禁用sink规则类别
  -sci,--sink_category_include <arg>   配置sink规则类别
 ```
 
 * 配置均可通过运行参数进行覆盖
-* 跑第一次会吐出 rule.json 配置文件， -r 可自定义配置
+* 跑一次后会吐出 rule.json 配置文件， -r 可自定义配置
 *  LLM 能力需要配置通义的 APIKEY（默认不启用 LLM ）：
     * 更新 rule.json 中 dashscope_api_key ;
     *  -lk 参数指定;
@@ -43,17 +43,20 @@ usage: SinkFinder
 
 参考运行命令：
 ```shell
-java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -p 代码路径 -d 遍历路径递归深度
+java -jar SinkFinder-1.0-SNAPSHOT-jar-with-dependencies.jar -p 代码路径 -d 遍历路径递归深度 -ci 项目文件名
 ```
 
 _运行结果保存在 logs 目录下：_
-* llm 结尾文件： 已过滤 source + LLM 结果
-* true 结尾文件：已过滤 source 
-* false 结尾文件：未过滤 source ，所有结果
+* Date_HighLLMRisk 开头的文件： 已过滤 source + LLM判断>7分 的路径
+* Date_LLMDetail.md 文件：大模型结果细节
+* Date_Risk 开头的文件：已过滤 source 的路径
+* Date_OtherRisk 开头的文件：未走到 source 的其他结果
 
 ### 规则说明
 
 符号 "*" 仅可用于 *_inclusions 相关的，表示允许所有。规则的白名单优先级高于黑名单。
+
+rules.json 文件 Sink 方法名支持正则配置。但注意：不支持"()"符号，因为与方法参数支持的()冲突。
 
 ```angular2html
 {
@@ -65,68 +68,99 @@ _运行结果保存在 logs 目录下：_
     "class_inclusions": ["*"], // 类白名单，如设置为"test"，com.test将进行检索
     "class_exclusions": ["logback","lombok"], // 类黑名单，如设置为"test"，com.test将无法检索
     "sink_rules": [
-    {
-    "sink_name": "RCE",
-    "sink_desc": "任意代码执行漏洞",
-    "severity_level": "High",
-    "sinks": ["java.lang.Runtime:exec","java.lang.ProcessBuilder:<init>","java.lang.ProcessBuilder:start","javax.script.ScriptEngine:eval","javax.swing.plaf.synth.SynthLookAndFeel:load"]
-    }, {
-    "sink_name": "UNSERIALIZE",
-    "sink_desc": "反序列化漏洞（包括原生反序列化、Yaml反序列化、XML反序列化、JDBC反序列化、json反序列化）",
-    "severity_level": "High",
-    "sinks": ["java.io.ObjectInputStream:readObject","java.io.ObjectInputStream:readUnshared",
-    "org.yaml.snakeyaml.Yaml:load","java.beans.XMLDecoder:readObject",
-    "org.apache.xmlrpc.parser.XmlRpcRequestParser:startElement","org.apache.xmlrpc.parser.XmlRpcRequestParser:endElement","com.thoughtworks.xstream.XStream:fromXML",
-    "com.mysql.cj.jdbc.result.ResultSetImpl:getObject", "java.sql.DriverManager:getConnection","java.sql.Driver:connect",
-    "com.alibaba.fastjson.JSON:parseObject","com.alibaba.fastjson.JSON:parse"]
-    }, {
-    "sink_name": "XSLT",
-    "sink_desc": "XSLT注入漏洞",
-    "severity_level": "High",
-    "sinks": ["org.apache.xml.security.transforms.Transforms:performTransforms"]
-    }, {
-    "sink_name": "JNDI",
-    "sink_desc": "JNDI注入漏洞",
-    "severity_level": "High",
-    "sinks": ["javax.naming.InitialContext:doLookup","javax.naming.InitialContext:lookup"]
-    }, {
-    "sink_name": "AuthBypass",
-    "sink_desc": "身份认证绕过风险",
-    "severity_level": "High",
-    "sinks": ["javax.servlet.http.HttpServletRequest:getRequestURI","javax.servlet.http.HttpServletRequest:getRequestURL"]
-    }, {
-    "sink_name": "SSTI",
-    "sink_desc": "模版注入漏洞（Velocity）",
-    "severity_level": "High",
-    "sinks": ["org.apache.velocity.app.Velocity:evaluate"]
-    }, {
-    "sink_name": "SPEL",
-    "sink_desc": "表达式执行漏洞（SPEL）",
-    "severity_level": "High",
-    "sinks": ["org.springframework.expression.spel.standard.SpelExpression:getValue"]
-    }, {
-    "sink_name": "ZIPSLIP",
-    "sink_desc": "ZIP目录穿越漏洞",
-    "severity_level": "High",
-    "sinks": ["java.util.zip.ZipInputStream:close"]
-    }, {
-    "sink_name": "DynamicInvoke",
-    "sink_desc": "动态调用风险",
-    "severity_level": "High",
-    "sinks": ["java.lang.reflect.Constructor:newInstance","java.lang.reflect.Method:invoke"]
-    }, {
-    "sink_name": "XXE",
-    "sink_desc": "外部实体注入漏洞",
-    "severity_level": "Medium",
-    "sinks": ["javax.xml.parsers.DocumentBuilder:parse","javax.xml.parsers.SAXParser:parse", "com.sun.org.apache.xerces.internal.parsers.DOMParser:parse","org.dom4j.io.SAXReader:read","org.xml.sax.XMLReader:parse","org.jdom2.input.SAXBuilder:build","org.apache.commons.digester3.Digester:parse","org.dom4j.DocumentHelper:parseText","org.apache.poi.xssf.usermodel.XSSFWorkbook:<init>"]
-    }, {
-    "sink_name": "SSRF",
-    "sink_desc": "服务端请求伪造漏洞",
-    "severity_level": "Medium",
-    "sinks": ["java.net.URL:openConnection","java.net.URL:openStream","org.springframework.web.client.RestTemplate:exchange","org.apache.http.client.fluent.Request:Get","javax.imageio.ImageIO:read","com.squareup.okhttp.OkHttpClient:newCall","org.apache.http.impl.client.CloseableHttpClient:execute","org.jsoup.Jsoup:connect","org.apache.commons.io.IOUtils:toByteArray","org.apache.http.client.HttpClient:execute"]
-    }
+        {
+        "sink_name": "RCE",
+        "sink_desc": "任意代码执行漏洞",
+        "severity_level": "High",
+        "sinks": ["java.lang.Runtime:exec","java.lang.ProcessBuilder:<init>|start","javax.script.ScriptEngine:eval",
+           "javax.swing.plaf.synth.SynthLookAndFeel:load","com.googlecode.aviator.AviatorEvaluator:execute",
+           "org.mozilla.javascript.Context:evaluateString|evaluateReader","groovy.lang.GroovyShell:evaluate",
+           "org.springframework.scripting.bsh.BshScriptEvaluator:evaluate", "io.kubernetes.client.util.KubeConfig:loadKubeConfig",
+           "cn.hutool.core.util.RuntimeUtil:exec.*","cn.hutool.cron.CronUtil:schedule",
+           "cn.hutool.extra.expression.ExpressionUtil:eval","cn.hutool.script.ScriptUtil:eval|evalInvocable",
+           "cn.hutool.script.FullSupportScriptEngine:eval","cn.hutool.script.JavaScriptEngine:eval"]
+        }, {
+        "sink_name": "UNSERIALIZE",
+        "sink_desc": "反序列化漏洞",
+        "severity_level": "High",
+        "sinks": ["java.io.ObjectInputStream:readObject|readUnshared", "org.yaml.snakeyaml.Yaml:load","java.beans.XMLDecoder:readObject",
+           "org.apache.xmlrpc.parser.XmlRpcRequestParser:startElement|endElement","com.thoughtworks.xstream.XStream:fromXML",
+           "com.mysql.cj.jdbc.result.ResultSetImpl:getObject", "java.sql.DriverManager:getConnection","java.sql.Driver:connect"]
+        }, {
+        "sink_name": "XSLT",
+        "sink_desc": "XSLT注入漏洞",
+        "severity_level": "High",
+        "sinks": ["org.apache.xml.security.transforms.Transforms:performTransforms"]
+        }, {
+        "sink_name": "FILE",
+        "sink_desc": "任意文件读取/写入漏洞",
+        "severity_level": "High",
+        "sinks": ["org.springframework.web.multipart.MultipartFile:transferTo","org.springframework.util.FileCopyUtils:copy",
+           "org.apache.tomcat.util.http.fileupload.disk.DiskFileItem:write","cn.hutool.extra.ssh.Sftp:upload",
+           "org.apache.commons.io.FileUtils:read[A-Z].*|write.*|copy.*|delete.*|forceDelete.*|listFiles.*|move.*", 
+           "cn.hutool.core.io.FileUtil:read[A-Z].*|write[A-Z].*|append[A-Z].*","javax.servlet.http.Part:write",
+           "org.apache.commons.io.filefilter.FileFilterUtils:filter.*", "org.apache.commons.io.output.DeferredFileOutputStream:writeTo",
+           "org.apache.commons.io.IOUtils:copy.*","java.io.FileOutputStream:write.*", "java.nio.file.Files:write.*|copy|move|createFile"]
+        }, {
+        "sink_name": "JNDI",
+        "sink_desc": "JNDI注入漏洞",
+        "severity_level": "High",
+        "sinks": ["javax.naming.InitialContext:doLookup|lookup"]
+        }, {
+        "sink_name": "AuthBypass",
+        "sink_desc": "身份认证绕过风险",
+        "severity_level": "High",
+        "sinks": ["javax.servlet.http.HttpServletRequest:getRequestURI|getRequestURL"]
+        }, {
+        "sink_name": "SSTI",
+        "sink_desc": "模版注入漏洞",
+        "severity_level": "High",
+        "sinks": ["org.apache.velocity.app.Velocity:evaluate","freemarker.cache.StringTemplateLoader:putTemplate",
+           "org.thymeleaf.TemplateEngine:process"]
+        }, {
+        "sink_name": "SPEL",
+        "sink_desc": "表达式执行漏洞",
+        "severity_level": "High",
+        "sinks": ["org.springframework.expression.spel.standard.SpelExpression:getValue", "ognl.Ognl:getValue",
+           "org.mvel2.MVEL:eval", "org.mvel.MVEL:eval"]
+        }, {
+        "sink_name": "ZIPSLIP",
+        "sink_desc": "ZIP目录穿越漏洞",
+        "severity_level": "High",
+        "sinks": ["java.util.zip.ZipInputStream:close"]
+        }, {
+        "sink_name": "DynamicInvoke",
+        "sink_desc": "动态调用风险",
+        "severity_level": "High",
+        "sinks": ["java.lang.reflect.Constructor:newInstance","java.lang.reflect.Method:invoke",
+           "org.codehaus.groovy.runtime.MethodClosure:doCall|call"]
+        }, {
+        "sink_name": "XXE",
+        "sink_desc": "外部实体注入漏洞",
+        "severity_level": "Medium",
+        "sinks": ["javax.xml.parsers.DocumentBuilder:parse","javax.xml.parsers.SAXParser:parse",
+           "com.sun.org.apache.xerces.internal.parsers.DOMParser:parse","org.dom4j.io.SAXReader:read",
+           "org.xml.sax.XMLReader:parse","org.jdom2.input.SAXBuilder:build",
+           "org.apache.commons.digester3.Digester:parse","org.dom4j.DocumentHelper:parseText",
+           "org.apache.poi.xssf.usermodel.XSSFWorkbook:<init>"]
+        }, {
+        "sink_name": "SSRF",
+        "sink_desc": "服务端请求伪造漏洞",
+        "severity_level": "Medium",
+        "sinks": ["java.net.URL:openConnection|openStream","org.springframework.web.client.RestTemplate:exchange|execute|getFor.*|postFor.*",
+           "org.apache.http.client.fluent.Request:Get","javax.imageio.ImageIO:read(Ljava/net/URL;)",
+           "com.squareup.okhttp.OkHttpClient:newCall","org.apache.http.impl.client.CloseableHttpClient:execute",
+           "org.jsoup.Jsoup:connect","org.apache.commons.io.IOUtils:toByteArray",
+           "org.apache.http.client.HttpClient:execute","org.apache.commons.io.FileUtils:copyURLToFile",
+           "cn.hutool.http.HttpUtil:createGet|createPost|get|post|download.*"]
+        }, {
+        "sink_name": "Fastjson",
+        "sink_desc": "Fastjson反序列化漏洞",
+        "severity_level": "Medium",
+        "sinks": ["com.alibaba.fastjson.JSON:parseObject|parse"]
+      }
     ]
- }
+}
 ```
 
 **_欢迎 Star & 交流 ～_**

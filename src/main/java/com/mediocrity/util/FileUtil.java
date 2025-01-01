@@ -4,9 +4,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 
 /**
  * @author: medi0cr1ty
@@ -31,4 +29,12 @@ public class FileUtil {
         return null;
     }
 
+    public static void writeLog(String content, String log) {
+        try (FileWriter fileWriter = new FileWriter(log, true)){
+            fileWriter.write(content);
+            fileWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

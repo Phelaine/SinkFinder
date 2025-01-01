@@ -4,6 +4,7 @@ import com.mediocrity.entity.SinkRule;
 import com.mediocrity.service.InsnAnalysis;
 import com.mediocrity.entity.Rules;
 import com.mediocrity.entity.SinkResult;
+import com.mediocrity.service.ResultProcesser;
 import com.mediocrity.util.FileUtil;
 import com.mediocrity.util.ClassReaderUtil;
 import com.mediocrity.util.RuleUtil;
@@ -13,9 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Date;
 
 /**
  * @author: medi0cr1ty
@@ -25,18 +24,15 @@ import java.util.Date;
 @Slf4j
 public class SinkFinder {
     private static final Logger logger = LoggerFactory.getLogger(SinkFinder.class);
-
     private static String SINK_RULE_FIlE = "rules.json";
 
-    private static Rules ruls;
-
-    private static String LOG_FILE = "vulns.log";
+    public static Rules ruls;
 
     public static String TARGET_PATH = ".";
     private static int RECURSION_DEPTH = 0;
     public static String DASHSCOPE_APIKEY = "";
     public static Boolean LLM_ENABLE = false;
-    private static String CUSTOM_SINK_RULE = "";
+    public static String CUSTOM_SINK_RULE = "";
     private static String CUSTOM_SINK_CATEGORY_BLOCK_RULE = "";
     private static String CUSTOM_SINK_CATEGORY_INCLUDE_RULE = "";
     private static String CUSTOM_CLASS_INCLUSIONS = "";
@@ -46,12 +42,8 @@ public class SinkFinder {
 
     public static void main(String[] args) {
 
-        HashSet<SinkResult> results;
-
         SinkFinder sinkFinder = new SinkFinder();
         sinkFinder.defaultParser(args);
-
-        File target_file = new File(TARGET_PATH);
 
         ruls = (Rules) FileUtil.getJsonContent(SINK_RULE_FIlE, Rules.class);
 
@@ -61,21 +53,35 @@ public class SinkFinder {
 
         logger.info("SinkFinder 启动 ...");
 
-        readFile(target_file, ruls);
+        String[] files = TARGET_PATH.split(",");
+        for ( String file : files ){
+            File f = new File(file);
+            readFile(f, ruls);
+        }
 
-        results = InsnAnalysis.run(ruls);
+        InsnAnalysis.run(ruls);
 
-        ArrayList<SinkResult> sortResults = new ArrayList<>(results);
-//        sortResults.sort((o1, o2) -> o2.invokeLength - o1.invokeLength);
+        // 结果统计
+        logger.info("过滤 Source 入口的链路：\n");
+        sinkFinder.counter(ResultProcesser.filterResult, ResultProcesser.filterResultLog);
+        if (LLM_ENABLE) {
+            logger.info("大模型判断为高风险链路：\n");
+            sinkFinder.counter(ResultProcesser.llmResult, ResultProcesser.llmResultLog);
+        }
+        logger.info("其他链路：\n");
+        sinkFinder.counter(ResultProcesser.otherResult, ResultProcesser.otherResultLog);
 
-        //文件记录
-        sinkFinder.fileStore(sortResults, false);
+        logger.info("分析任务完成！");
 
-        ArrayList<SinkResult> sortFilterResults = new ArrayList<>(InsnAnalysis.filterResult);
-        sinkFinder.fileStore(sortFilterResults, true);
+//        ArrayList<SinkResult> sortResults = new ArrayList<>(InsnAnalysis.otherResult);
+////        sortResults.sort((o1, o2) -> o2.invokeLength - o1.invokeLength);
+//
+//        //文件记录
+//        sinkFinder.fileStore(sortResults, false);
+//
+//        ArrayList<SinkResult> sortFilterResults = new ArrayList<>(InsnAnalysis.filterResult);
+//        sinkFinder.fileStore(sortFilterResults, true);
 
-        if (LLM_ENABLE) logger.info("分析任务完成! 调用大模型能力异步任务执行中....");
-        else logger.info("分析任务完成！");
     }
 
     public static void readFile(File dir, Rules ruls) {
@@ -97,49 +103,24 @@ public class SinkFinder {
         }
     }
 
-    private void fileStore(ArrayList<SinkResult> sortResults, Boolean isFilter ) {
-        java.util.Date day = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmm");
+    private void counter(HashSet<SinkResult> sinkResults, String logFile) {
         String out;
-
-        if (CUSTOM_SINK_RULE.length() == 0) {
-            String[] f = TARGET_PATH.split("/");
-            if (f.length == 1)
-                f = TARGET_PATH.split("\\\\");
-            LOG_FILE = "vul_" + sdf.format(day) + "_" + f[f.length-1].replace(".", "_").replace(":","") + "_" + isFilter + ".log";
-        } else{
-            String[] f = CUSTOM_SINK_RULE.split(":")[0].split("\\.");
-            LOG_FILE = "vul_" + sdf.format(day) + "_" + f[f.length-1] + "_" + CUSTOM_SINK_RULE.split(":")[1].replace(".", "_").replace("(","_").replace(")","_").replace(";","_") + "_" + isFilter + ".log";
-        }
-
-        File log = new File("logs" + File.separator + LOG_FILE);
         try {
-            if (!log.exists()) {
-                log.createNewFile();
-            }
-            FileWriter fileWriter = new FileWriter(log, false);
-            fileWriter.write(ruls.toString() + "\n${PATH} 绝对路径：" + TARGET_PATH + "\n\n");
-
             HashMap<String, Integer> countMap = new HashMap<>();
             int count = 0;
-            for (SinkResult sinkResult : sortResults) {
+            for (SinkResult sinkResult : sinkResults) {
                 count++;
-                fileWriter.write(count + " - " + sinkResult.toString(false) + "\n");
-
                 countMap.put(sinkResult.getSinkCata(), countMap.getOrDefault(sinkResult.getSinkCata(), 0) + 1);
-
             }
 
-            out = "过滤模式：" + isFilter + "，共找到 " + count + " 条路径 \n";
-            fileWriter.write(out);
+            out = "共找到 " + count + " 条路径 \n";
+            FileUtil.writeLog(out, logFile);
             logger.info(out);
             for (Map.Entry<String, Integer> entry : countMap.entrySet()) {
-                out = entry.getKey() + " 类别存在：" + entry.getValue() + " 条路径" + "\n";
-                fileWriter.write(out);
+                out = entry.getKey() + " 类别存在：" + entry.getValue() + " 条路径 \n";
+                FileUtil.writeLog(out, logFile);
                 logger.info(out);
             }
-            fileWriter.flush();
-            fileWriter.close();
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -153,19 +134,19 @@ public class SinkFinder {
                 " / __|| || '_ \\ | |/ /|  _|| || '_ \\  / _` | / _ \\| '__|\n" +
                 " \\__ \\| || | | ||   < | |  | || | | || (_| ||  __/| |   \n" +
                 " |___/|_||_| |_||_|\\_\\|_|  |_||_| |_| \\__,_| \\___||_|   \n" +
-                "                                             0.2@medi0cr1ty\n" +
+                "                                             2.0@medi0cr1ty\n" +
                 "                                                        ";
         System.out.println(banner);
 
         Options options = new Options();
 
-        Option path = Option.builder("p").longOpt("path").hasArg().required(false).desc("指定目标分析路径").build();
+        Option path = Option.builder("p").longOpt("path").hasArg().required(true).desc("指定目标分析路径，支持多个以,分隔").build();
         options.addOption(path);
 
         Option rule = Option.builder("r").longOpt("rule").argName("rules.json").hasArg().required(false).desc("指定Sink JSON规则路径，初始化默认resources/rules.json").build();
         options.addOption(rule);
 
-        Option sink = Option.builder("s").longOpt("sink").hasArg().required(false).desc("自定义sink规则").build();
+        Option sink = Option.builder("s").longOpt("sink").hasArg().required(false).desc("自定义sink规则，可添加多个以,分隔").build();
         options.addOption(sink);
 
         Option targetBlock = Option.builder("scb").longOpt("sink_category_block").hasArg().required(false).desc("禁用sink规则类别").build();
@@ -208,12 +189,8 @@ public class SinkFinder {
                 System.exit(0);
             }
 
-            if (cmd.hasOption("p")) {
-                TARGET_PATH = cmd.getOptionValue("path");
-            } else {
-                TARGET_PATH = ".";
-            }
-            TARGET_PATH = new File(TARGET_PATH).getAbsolutePath();
+            TARGET_PATH = cmd.getOptionValue("path");
+            log.info("目标分析路径: " + TARGET_PATH);
 
             if (cmd.hasOption("r")) {
                 SINK_RULE_FIlE = cmd.getOptionValue("rule");
@@ -239,7 +216,7 @@ public class SinkFinder {
             if (cmd.hasOption("s")) {
                 CUSTOM_SINK_RULE = cmd.getOptionValue("sink");
                 if (!CUSTOM_SINK_RULE.contains(":")){
-                    log.warn("自定义sink规则格式参考：全类名:方法名[方法签名]，方法签名可选");
+                    log.warn("自定义sink规则格式参考：全类名:方法名(方法签名)，如：org.apache.http.client.HttpClient:execute(Lorg.apache.http.client.methods.HttpUriRequest;)，方法签名可选");
                     System.exit(0);
                 }
                 log.info("自定义sink规则: " + CUSTOM_SINK_RULE);
@@ -299,9 +276,6 @@ public class SinkFinder {
             System.exit(0);
         }
 
-        log.info("目标分析路径: " + TARGET_PATH);
-
-
     }
 
     private void customRule(){
@@ -309,8 +283,14 @@ public class SinkFinder {
             String[] cusSinkRules = CUSTOM_SINK_RULE.split(",");
             ruls.getSinkRules().clear();
             SinkRule sinkRule = new SinkRule("CUSTOM","自定义Sink点","CUSTOM", new ArrayList<>());
-            for (String cusSinkRule : cusSinkRules) {
-                sinkRule.getSinks().add(cusSinkRule);
+            if ( cusSinkRules.length == 1 ) {
+                String cusSink = cusSinkRules[0] + ",";
+                sinkRule.getSinks().add(cusSink);
+            }
+            else {
+                for (String cusSinkRule : cusSinkRules) {
+                    sinkRule.getSinks().add(cusSinkRule);
+                }
             }
             ruls.getSinkRules().add(sinkRule);
         }

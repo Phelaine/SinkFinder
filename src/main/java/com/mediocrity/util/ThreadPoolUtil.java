@@ -10,40 +10,20 @@ public class ThreadPoolUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ThreadPoolUtil.class);
 
-    private volatile static ThreadPoolExecutor executor;
+    private volatile static ThreadPoolExecutor llmExecutor;
+    private volatile static ThreadPoolExecutor resultProcessExecutor;
 
     static {
-        initExecutor();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                logger.info("AsyncProcessor shutting down.");
-
-                executor.shutdown();
-
-                try {
-                    // 等待1秒执行关闭
-                    if (!executor.awaitTermination(1, TimeUnit.SECONDS)) {
-                        logger.error("AsyncProcessor shutdown immediately due to wait timeout.");
-                        executor.shutdownNow();
-                    }
-                } catch (InterruptedException e) {
-                    logger.error("AsyncProcessor shutdown interrupted.");
-                    executor.shutdownNow();
-                }
-
-                logger.info("AsyncProcessor shutdown complete.");
-            }
-        }));
+        initLLMExecutor();
+        initResultProcessExecutor();
     }
 
-    private static void initExecutor() {
+    private static void initLLMExecutor() {
 
         ThreadFactory namedThreadFactory = new ThreadFactoryBuilder()
-                .setNameFormat("Compute-pool-%d").build();
+                .setNameFormat("LLMCompute-pool-%d").build();
         // 线程池
-        executor = new ThreadPoolExecutor(2 * Runtime.getRuntime().availableProcessors() + 1, 3 * Runtime.getRuntime().availableProcessors(),
+        llmExecutor = new ThreadPoolExecutor(2 * Runtime.getRuntime().availableProcessors() + 1, 3 * Runtime.getRuntime().availableProcessors(),
                 1000L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(1000), namedThreadFactory, new ThreadPoolExecutor.CallerRunsPolicy()) {
             @Override
@@ -68,12 +48,58 @@ public class ThreadPoolUtil {
 
     }
 
-    public static <T> Future<T> submit(Callable<T> task) {
-        logger.info("异步调用大模型能力中......");
-        return executor.submit(task);
+    public static void initResultProcessExecutor() {
+
+        ThreadFactory namedThreadFactory = new ThreadFactoryBuilder()
+                .setNameFormat("ResultProcess-pool-%d").build();
+        // 线程池
+        resultProcessExecutor = new ThreadPoolExecutor(2 * Runtime.getRuntime().availableProcessors() + 1, 3 * Runtime.getRuntime().availableProcessors(),
+                1000L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(1000), namedThreadFactory, new ThreadPoolExecutor.CallerRunsPolicy()) {
+            @Override
+            protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+                // execute提交
+                if (t != null) {
+                    t.printStackTrace();
+                }
+                // r的实际类型是FutureTask 那么是submit提交的，所以可以在里面get到异常
+                if (r instanceof FutureTask) {
+                    try {
+                        Future<?> future = (Future<?>) r;
+                        future.get();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        };
     }
 
-    public static void execute(Runnable task) {
-        executor.execute(task);
+    public static ThreadPoolExecutor getPoolExecutor(ThreadType threadPoolType) {
+        ThreadPoolExecutor threadPoolExecutor = null;
+        switch (threadPoolType) {
+            case LLM:
+                logger.info("Invoke LLMing......");
+                threadPoolExecutor = llmExecutor;
+                break;
+            case ResultProcess:
+                logger.info("Result processing......");
+                threadPoolExecutor = resultProcessExecutor;
+                break;
+            default:
+                threadPoolExecutor = resultProcessExecutor;
+
+        }
+        return threadPoolExecutor;
+    }
+
+    public static <T> Future<T> submit(Callable<T> task, ThreadType type) {
+        return getPoolExecutor(type).submit(task);
+    }
+
+    public static void execute(Runnable task, ThreadType type) {
+        getPoolExecutor(type).execute(task);
     }
 }

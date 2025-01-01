@@ -19,15 +19,13 @@ import com.alibaba.dashscope.exception.InputRequiredException;
 import com.alibaba.dashscope.exception.NoApiKeyException;
 import com.mediocrity.model.ClassZoom;
 import com.mediocrity.util.DecompileUtil;
-import com.mediocrity.util.ThreadPoolUtil;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LLMAnalysis {
 
@@ -36,19 +34,16 @@ public class LLMAnalysis {
     private static final Message systemMsg = Message.builder().role(Role.SYSTEM.getValue()).content(PromptConfig.SYS_PROMPT).build();
     private static final Message analysisMsg = Message.builder().role(Role.SYSTEM.getValue()).content(PromptConfig.GUIDELINES_TEMPLATE).build();
 
-    private static String LOG_FILE = "vul_" + new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date()) + "_llm" + ".md";
-    public static final HashSet<String> llmResult = new HashSet<>();
+    private static String LLMDetail = new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date()) + "_LLMDetail.md";
 
     private static File log;
-    private static Lock lock;
-//    public static FileWriter fileWriter;
 
     public static HashMap<String, String> contextClasses = new HashMap<>();
 
-    public static Future<Boolean> llmTask;
+//    public static Future<Integer> llmTask;
+//    public static List<Future<Integer>> llmTasks = new ArrayList<>();
 
-    public static void llmprocess(ArrayList<String> pathResult, SinkResult s, String apiKey){
-//        contextClasses.clear();
+    public static int llmProcess(ArrayList<String> pathResult, SinkResult s, String apiKey){
         StringBuilder contextString = new StringBuilder();
         HashSet<String> pathClass = new HashSet<>();
         String classInfo = "";
@@ -72,17 +67,19 @@ public class LLMAnalysis {
                 pathClass.add(className);
             }
 
-//            String sr = s.toString(true,false);
             String finalContext = contextString.toString();
-            llmTask = ThreadPoolUtil.submit(() -> call(finalContext, s, apiKey));
+//            llmTask = ThreadPoolUtil.submit(() -> call(finalContext, s, apiKey), ThreadType.LLM);
+//            llmTasks.add(llmTask);
+            return call(finalContext, s, apiKey);
         } catch (Exception e) {
             logger.info("AsyncProcessor executeTask error", e);
         }
+        return 0;
     }
 
-    public static Boolean call(String contextClass, SinkResult pathResult, String apiKey) {
+    public static int call(String contextClass, SinkResult pathResult, String apiKey) {
         Generation gen = new Generation();
-        GenerationParam param;
+        int score = 0;
         GenerationResult result;
         StringBuilder sb =  new StringBuilder();
         sb.append("\n\n").append(pathResult.toString(false,true)).append("\n");
@@ -93,7 +90,38 @@ public class LLMAnalysis {
         Message msg1 = Message.builder().role(Role.USER.getValue()).content("上下文代码：" + contextClass).build();
         messages.addAll(Arrays.asList(msg, msg1));
 
-        param = GenerationParam.builder()
+        for (int i = 0; i < 2 ; i++) {
+            try {
+                result = gen.call(createGenerationParam(messages, apiKey));
+            } catch (NoApiKeyException | InputRequiredException e) {
+                throw new RuntimeException(e);
+            }
+
+            for (int j = 0; j < result.getOutput().getChoices().size() ; j++) {
+                if ( i==0 ){
+                    messages.add(result.getOutput().getChoices().get(j).getMessage());
+                    sb.append(result.getOutput().getChoices().get(j).getMessage().getContent());
+                }
+                else{
+                    String r = result.getOutput().getChoices().get(j).getMessage().getContent();
+                    Pattern pattern = Pattern.compile("\\d+");
+                    Matcher matcher = pattern.matcher(r);
+                    if (matcher.find()) {
+                        score = Integer.parseInt(matcher.group());
+                        break;
+                    }
+                }
+            }
+            if ( i==0 ) messages.add(Message.builder().role(Role.USER.getValue()).content("只需要给出最终评分数字即可").build());
+        }
+
+        LLMAnalysis.write(sb.toString());
+        return score;
+    }
+
+
+    public static GenerationParam createGenerationParam(List<Message> messages, String apiKey) {
+        GenerationParam param = GenerationParam.builder()
                 .model("qwen-plus")
                 .messages(messages)
                 .resultFormat(ConversationParam.ResultFormat.MESSAGE)
@@ -106,22 +134,7 @@ public class LLMAnalysis {
         else{
             throw new RuntimeException("未识别到通义APIKEY，请通过配置文件或环境变量配置DASHSCOPE_API_KEY（sk-xxx）");
         }
-//        logger.info("请求参数："+param.toString());
-        try {
-            result = gen.call(param);
-        } catch (NoApiKeyException | InputRequiredException e) {
-            throw new RuntimeException(e);
-        }
-
-        for (int i = 0; i < result.getOutput().getChoices().size() ; i++) {
-            sb.append(result.getOutput().getChoices().get(i).getMessage().getContent());
-//            logger.info("\n大模型结果：" + result.getOutput().getChoices().get(i).getMessage().getContent());
-        }
-
-//        llmResult.add(sb.toString());
-        LLMAnalysis.write(sb.toString());
-        logger.info(sb.toString());
-        return true;
+        return param;
     }
 
     public static void write(String content) {
@@ -137,14 +150,12 @@ public class LLMAnalysis {
     }
 
     static {
-        log = new File("logs" + File.separator + LOG_FILE);
+        log = new File("logs" + File.separator + LLMDetail);
         try {
-//            fileWriter = new FileWriter(log, true);
             if (!log.exists()) {
                 log.createNewFile();
             }
             write("[TOC]\n");
-            lock = new ReentrantLock();
         }catch (IOException e) {
             throw new RuntimeException(e);
         }
