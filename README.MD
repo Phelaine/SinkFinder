@@ -1,1 +1,1 @@
-# SinkFinder - 私有化 
+# SinkFinder - 私有化
