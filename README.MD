@@ -1,9 +1,5 @@
 # SinkFinder + LLM
 
-### 特别说明
-
-这个项目不是我开发的，实际开发者是[medi0cr1ty](https://github.com/Phelaine), 我只是早期提供一点思路和内测而已，因为一些极其傻逼的原因，不能直接开源在medi0cr1ty的名下，所以转到我这儿暂存而已。
-
 ### 功能说明
 
 [闭源系统半自动漏洞挖掘工具](https://mp.weixin.qq.com/s/pKA0eG0B_yMkeV2-C1edWw)，针对 jar/war/zip 进行静态代码分析，增加 LLM 大模型能力验证路径可达性，LLM根据上下文代码环境判断该路径可信分数。
